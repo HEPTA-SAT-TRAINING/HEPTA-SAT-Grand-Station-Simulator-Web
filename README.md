@@ -1,37 +1,43 @@
-# HEPTA-SAT Grand Station Simulator Web — GitHub Pages
+# HEPTA-SAT Grand Station Simulator Web
 
-GitHub Pages専用の静的Web版です。
+A browser-based ground station simulator for HEPTA-SAT training. This repository contains a static web application designed for deployment with GitHub Pages.
 
-公開予定URL:
+## Live Site
 
-```text
-https://2578172872-beep.github.io/HEPTA-SAT-Grand-Station-Simulator-Web/
-```
+https://hepta-sat-training.github.io/HEPTA-SAT-Grand-Station-Simulator-Web/
 
-## 構成
+## Features
 
-- `index.html`: 機能選択と画面切替の入口
-- `features.js`: 機能一覧
-- `app.js`: 機能選択処理
-- `styles.css`: 機能選択とプレースホルダーのスタイル
-- `public/ground-station.html`: 既存地上局UI
-- `public/`: 地図、衛星軌道、Three.js資産
-- `.github/workflows/pages.yml`: GitHub Pages自動公開
+- Real-time ground station dashboard
+- Satellite orbit and ground-track visualization
+- Telemetry reception, decoding, and display
+- Web Serial communication with supported serial devices
+- Modular feature selector for future extensions
 
-## 新しい機能を追加する
+## Project Structure
 
-1. `features.js` に機能情報を追加する。
-2. `index.html` に同じIDの `data-feature-view` セクションを追加する。
-3. 必要なJavaScriptやCSSを独立ファイルとして追加する。
+- `index.html`: Application entry point and feature view container
+- `features.js`: Feature definitions
+- `app.js`: Feature selection logic
+- `styles.css`: Application shell and feature selector styles
+- `public/ground-station.html`: Ground station interface
+- `public/`: Maps, orbit libraries, and Three.js assets
+- `.github/workflows/pages.yml`: GitHub Pages deployment workflow
 
-Ground Stationのiframeは機能切替時も破棄しないため、シリアル接続や画面状態を維持します。
+The ground station iframe remains mounted when switching features so that the serial connection and application state are preserved.
 
-## ローカル確認
+## Adding a New Feature
 
-ファイルを直接開かず、HTTPサーバーから表示してください。
+1. Add the feature definition to `features.js`.
+2. Add a matching `data-feature-view` section to `index.html`.
+3. Add any required JavaScript and CSS as separate files.
+
+## Local Development
+
+Serve the repository through a local HTTP server instead of opening the files directly:
 
 ```bash
 python3 -m http.server 8080
 ```
 
-ChromeまたはEdgeで `http://localhost:8080/` を開きます。
+Open `http://localhost:8080/` in Chrome or Edge. Web Serial requires a secure context, such as HTTPS or localhost, and a compatible browser.
