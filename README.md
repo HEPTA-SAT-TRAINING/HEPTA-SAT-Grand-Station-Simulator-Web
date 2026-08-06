@@ -44,7 +44,8 @@ Open `http://localhost:8080/` in Chrome or Edge. Web Serial requires a secure co
 
 ## HEPTA XBee / Lab5-03 compatibility
 
-Web Serial opens the XBee adapter at **9600 baud**, matching
+Web Serial opens the XBee adapter at **38400 baud**, matching the existing
+HEPTA training XBee pair. The binary frame format and value conversions match
 `HEPTA-SAT-Flight-Software/GS/Hepta_sat_flightsoftware/main.cpp`. The receiver buffers arbitrary
 Web Serial chunks until LF, matching the line-oriented behavior of HEPTA-SAT Serial
 Monitor. It accepts both the Lab5-03 `TEMP=...,BUS=...,V5=...` line and Flightware
