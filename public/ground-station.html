@@ -4181,7 +4181,7 @@
 
         updatePortStatus("connected", "Python接続中");
         backendReceiverConnected = true;
-        updateFooterPort("Python Backend / 9600 bps");
+        updateFooterPort(`Python Backend / ${XBEE_BAUD_RATE} bps`);
         updateTelemetryReceiveGate();
         return true;
       } catch (error) {
@@ -4414,7 +4414,7 @@
 
         updatePortStatus("connected", "接続中");
         selectedPortName.textContent = portName;
-        updateFooterPort(`${portName} / 9600 bps`);
+        updateFooterPort(`${portName} / ${XBEE_BAUD_RATE} bps`);
         startSimulatedRssi();
         startXbeeReadLoop();
         return true;
