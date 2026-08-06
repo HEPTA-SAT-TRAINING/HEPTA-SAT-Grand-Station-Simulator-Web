@@ -44,8 +44,13 @@ Open `http://localhost:8080/` in Chrome or Edge. Web Serial requires a secure co
 
 ## HEPTA XBee / Lab5-03 compatibility
 
-Web Serial opens the XBee adapter at **38400 baud**. The receiver buffers arbitrary
+Web Serial opens the XBee adapter at **9600 baud**, matching
+`HEPTA-SAT-Flight-Software/GS/Hepta_sat_flightsoftware/main.cpp`. The receiver buffers arbitrary
 Web Serial chunks until LF, matching the line-oriented behavior of HEPTA-SAT Serial
 Monitor. It accepts both the Lab5-03 `TEMP=...,BUS=...,V5=...` line and Flightware
 `V=...,TEMP=...,AX=...` fields. Received hardware telemetry is displayed during
 bench tests regardless of the simulated satellite elevation.
+
+Binary HK telemetry uses the reference 30-byte frame and conversions: voltage
+ADC count (`V / (3.3 * 1.431) * 4096`), temperature (`degC * 10`), acceleration
+(`m/s2 / 9.8 * 512`), gyro (`deg/s * 2048 / 125`), and integer magnetometer uT.

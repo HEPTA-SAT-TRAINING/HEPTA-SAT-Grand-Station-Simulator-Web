@@ -2516,10 +2516,10 @@
     const TELEMETRY_PACKET = {
       // 全体形式：7E | Sat ID | Type | Seq(2B) | Len | Payload | Checksum
       // HK Payload：
-      //   Mode(1B) | Voltage[mV](2B) | Temperature[0.1 degC](2B)
-      //   Acc XYZ[0.01 m/s^2](int16 x3)
-      //   Gyro XYZ[0.1 deg/s](int16 x3)
-      //   Mag XYZ[0.1 uT](int16 x3)
+      //   Mode(1B) | Voltage ADC count(2B) | Temperature[0.1 degC](2B)
+      //   Acc XYZ[512 count/g](int16 x3)
+      //   Gyro XYZ[2048/125 count/(deg/s)](int16 x3)
+      //   Mag XYZ[uT integer](int16 x3)
       // Payload length = 5 byte (basic) or 23 byte (mission)
       header: 0x7E,
       satId: 0x01,
@@ -2690,11 +2690,11 @@
     function decodeHkPayload(payload, packetType = TELEMETRY_PACKET.typeHk) {
       // HK Telemetry payload format（教材用）
       // Payload[0]    : 運用モード 0x00=Standby, 0x01=Mission
-      // Payload[1-2]  : 電圧 mV, uint16, big-endian 例 3.89 V = 3890 = 0x0F32
+      // Payload[1-2]  : 電圧 ADC count, uint16, big-endian
       // Payload[3-4]  : 温度 0.1 degC, int16, big-endian 例 23.2 degC = 232 = 0x00E8
-      // Payload[5-10] : 加速度XYZ 0.01 m/s^2, int16 x3
-      // Payload[11-16]: 角速度XYZ 0.1 deg/s, int16 x3
-      // Payload[17-22]: 地磁気XYZ 0.1 uT, int16 x3
+      // Payload[5-10] : 加速度XYZ 512 count/g, int16 x3
+      // Payload[11-16]: 角速度XYZ 2048/125 count/(deg/s), int16 x3
+      // Payload[17-22]: 地磁気XYZ uT integer, int16 x3
       if (!payload || payload.length < TELEMETRY_PACKET.basicPayloadLength) return null;
 
       const packetTypeMode = decodePacketTypeMode(packetType);
