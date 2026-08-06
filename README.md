@@ -41,3 +41,11 @@ python3 -m http.server 8080
 ```
 
 Open `http://localhost:8080/` in Chrome or Edge. Web Serial requires a secure context, such as HTTPS or localhost, and a compatible browser.
+
+## HEPTA XBee / Lab5-03 compatibility
+
+Web Serial opens the XBee adapter at **38400 baud**. The receiver buffers arbitrary
+Web Serial chunks until LF, matching the line-oriented behavior of HEPTA-SAT Serial
+Monitor. It accepts both the Lab5-03 `TEMP=...,BUS=...,V5=...` line and Flightware
+`V=...,TEMP=...,AX=...` fields. Received hardware telemetry is displayed during
+bench tests regardless of the simulated satellite elevation.
