@@ -1335,6 +1335,16 @@
       display: block;
     }
 
+    /* The graph checklist extends below the title bar. Keep it above the
+       graph body instead of clipping it at the panel boundary. */
+    .panel[data-panel-id="telemetry-graphs"] {
+      overflow: visible;
+    }
+
+    .panel[data-panel-id="telemetry-graphs"] > .telemetry-graph-body {
+      overflow: hidden;
+    }
+
     .packet-log {
       min-height: 0;
       border: 1px solid rgba(45, 70, 84, 0.8);
@@ -2233,6 +2243,15 @@
         radial-gradient(ellipse at 50% 55%, rgba(0, 91, 216, 0.12), transparent 58%),
         rgba(255, 255, 255, 0.72);
       box-shadow: 0 0 10px rgba(0, 91, 216, 0.10);
+    }
+
+    /* Keep selector popovers clickable after the compact panel-title rules. */
+    .panel-title-with-actions {
+      overflow: visible;
+    }
+
+    .panel[data-panel-id="telemetry-graphs"] {
+      overflow: visible;
     }
   </style>
 </head>
@@ -4340,6 +4359,10 @@
         const trimmed = line.replace(/\r$/, "").trim();
         if (trimmed.length > 0) {
           feedHexTextPacketStream(trimmed);
+          if (telemetryAllowed && /(?:TEMP|BUS|V5|V3V3|SAP|ISOL|IBUS|ICHG|AX|AY|AZ|GX|GY|GZ|MX|MY|MZ)\s*=/.test(trimmed)) {
+            const lineBytes = new TextEncoder().encode(trimmed);
+            updateRawSerialHexDisplay(bytesToHex(lineBytes));
+          }
           if (telemetryAllowed) updateTelemetryDisplayFromBackendText(trimmed);
           updateCommandAckLog(trimmed);
           counted += 1;
@@ -4450,7 +4473,6 @@
       const row = commandLogHistory.find(item =>
         item.type === "tx" &&
         !item.ackReceived &&
-        !item.timedOut &&
         (
           String(item.expectedAck || "").toUpperCase() === expectedAck ||
           getAckModeFromText(item.expectedAck) === mode
@@ -4459,6 +4481,7 @@
       if (!row) return false;
 
       row.ackReceived = true;
+      row.timedOut = false;
       row.ackReceivedAtMs = Date.now();
       renderCommandLog();
       return true;
@@ -4469,11 +4492,11 @@
       const row = commandLogHistory.find(item =>
         item.type === "tx"
         && !item.ackReceived
-        && !item.timedOut
         && String(item.expectedAck || "").toUpperCase() === expected
       );
       if (!row) return false;
       row.ackReceived = true;
+      row.timedOut = false;
       row.ackReceivedAtMs = Date.now();
       renderCommandLog();
       return true;

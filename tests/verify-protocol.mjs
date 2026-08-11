@@ -179,6 +179,8 @@ assert.match(html, /DEFAULT_VISIBLE_GRAPHS\s*=\s*new Set/);
 assert.match(html, /id="image-receive-progress-bar"/);
 assert.match(html, /imageReceiveProgressBar\.value/);
 assert.match(html, /grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\)/);
+assert.match(html, /updateRawSerialHexDisplay\(bytesToHex\(lineBytes\)\)/);
+assert.match(html, /row\.timedOut = false;/);
 
 // The command UI must accept the three single-byte Lab commands, including p.
 const commandIdsSource = html.match(/commandIds:\s*{([\s\S]*?)}/)?.[1] || "";
