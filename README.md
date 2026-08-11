@@ -23,7 +23,8 @@ https://hepta-sat-training.github.io/HEPTA-SAT-Grand-Station-Simulator-Web/
 - `app.js`: Feature selection logic
 - `styles.css`: Application shell and feature selector styles
 - `public/ground-station.html`: Ground station interface
-- `public/hepta-image-receiver.js`: Lab5-05 image stream demultiplexer and assembler
+- `public/hepta-image-receiver.js`: telemetry/image stream adapter
+- `public/vendor/hepta-serial-monitor`: pinned HEPTA-SAT Serial Monitor submodule
 - `tests/verify-protocol.mjs`: fragmented serial/image protocol mock test
 - `public/`: Maps, orbit libraries, and Three.js assets
 - `.github/workflows/pages.yml`: GitHub Pages deployment workflow
@@ -37,6 +38,28 @@ The ground station iframe remains mounted when switching features so that the se
 3. Add any required JavaScript and CSS as separate files.
 
 ## Local Development
+
+Clone with the fixed protocol dependency:
+
+```bash
+git clone --recurse-submodules \
+  https://github.com/HEPTA-SAT-TRAINING/HEPTA-SAT-Grand-Station-Simulator-Web.git
+cd HEPTA-SAT-Grand-Station-Simulator-Web
+git submodule status
+```
+
+For an existing clone or after switching branches:
+
+```bash
+git submodule sync --recursive
+git submodule update --init --recursive
+git submodule status
+```
+
+The Serial Monitor dependency is pinned by the parent gitlink to commit
+`399e8ff64f762a4aacfa5d6e518e9d3905738d6a`. Do not use
+`git submodule update --remote` for a normal build, because that bypasses the
+reproducible version selected by this repository.
 
 Serve the repository through a local HTTP server instead of opening the files directly:
 
@@ -81,13 +104,18 @@ HP START/DATA/PARITY/END packets
 \nIMG_END\n
 ```
 
-The receiver accepts arbitrary Web Serial chunk boundaries, validates each
-packet with CRC-16/CCITT-FALSE, validates the complete JPEG CRC and SOI/EOI
-markers, and uses the XOR parity packet to recover one missing/corrupt DATA
-packet. Images are limited to 4,194,048 bytes by the 64-byte payload and
-16-bit packet-count fields. Packet timeout is 10 seconds and overall
-image timeout is 60 seconds. Image processing is event-driven, so the page UI
-remains responsive during reception.
+`public/hepta-image-receiver.js` delegates packet parsing, packet CRC checking,
+full-image CRC checking, and XOR parity reconstruction to the public modules in
+the pinned HEPTA-SAT Serial Monitor submodule. It only adds stream
+demultiplexing, timeout handling, JPEG marker validation, and UI callbacks; the
+external implementation is not copied or modified.
+
+The receiver accepts arbitrary Web Serial chunk boundaries and can recover one
+missing/corrupt DATA packet. Images are limited to 4,194,048 bytes by the
+Library's 64-byte DATA payload and 16-bit packet-count fields. Packet timeout is
+10 seconds and overall image timeout is 60 seconds. Image processing is
+event-driven, so the page UI remains responsive during reception. The GitHub
+Pages workflow also initializes submodules before publishing.
 
 ## Verification
 
@@ -97,6 +125,7 @@ Run the mock protocol test with Node.js:
 npm test
 ```
 
-It verifies arbitrary stream fragmentation, image reconstruction, CRC-16,
+It exercises the pinned Serial Monitor modules through the production adapter
+and verifies arbitrary stream fragmentation, image reconstruction, CRC-16,
 one-packet parity recovery, and preservation of telemetry bytes before and
 after an image transfer.

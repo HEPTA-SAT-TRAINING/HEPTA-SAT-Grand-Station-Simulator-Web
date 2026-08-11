@@ -1,10 +1,15 @@
 import assert from "node:assert/strict";
-import { createRequire } from "node:module";
 import fs from "node:fs";
 import vm from "node:vm";
-
-const require = createRequire(import.meta.url);
-const { StreamReceiver, crc16, constants } = require("../public/hepta-image-receiver.js");
+import { StreamReceiver } from "../public/hepta-image-receiver.js";
+import { crc16CcittFalse as crc16 } from "../public/vendor/hepta-serial-monitor/docs/crc16.js";
+import {
+  FORMAT_JPEG,
+  PACKET_TYPE_DATA,
+  PACKET_TYPE_END,
+  PACKET_TYPE_PARITY,
+  PACKET_TYPE_START,
+} from "../public/vendor/hepta-serial-monitor/docs/packet.js";
 
 function le16(value) {
   return [value & 0xFF, (value >> 8) & 0xFF];
@@ -41,7 +46,7 @@ const payloadSize = 8;
 const dataCount = Math.ceil(image.length / payloadSize);
 const total = dataCount + 3;
 const startPayload = new Uint8Array([
-  constants.FORMAT_JPEG,
+  FORMAT_JPEG,
   ...le16(7),
   image.length, 0, 0, 0,
   ...le16(crc16(image)),
@@ -58,12 +63,12 @@ const telemetryAfter = new Uint8Array([0x7E, 1, 0x11, 0, 2, 5, 1, 4, 5, 6, 7, 31
 const stream = concat(
   telemetryBefore,
   new TextEncoder().encode("IMG_BEGIN\n"),
-  packet(constants.TYPE_START, 0, total, startPayload),
-  packet(constants.TYPE_START, 0, total, startPayload),
-  packet(constants.TYPE_DATA, 1, total, data1),
+  packet(PACKET_TYPE_START, 0, total, startPayload),
+  packet(PACKET_TYPE_START, 0, total, startPayload),
+  packet(PACKET_TYPE_DATA, 1, total, data1),
   // DATA 2 is intentionally missing and must be recovered by parity.
-  packet(constants.TYPE_PARITY, dataCount + 1, total, parity),
-  packet(constants.TYPE_END, total - 1, total),
+  packet(PACKET_TYPE_PARITY, dataCount + 1, total, parity),
+  packet(PACKET_TYPE_END, total - 1, total),
   new TextEncoder().encode("\nIMG_END\n"),
   telemetryAfter
 );
@@ -99,15 +104,15 @@ assert.deepEqual(telemetry.slice(0, telemetryBefore.length), telemetryBefore);
 assert.deepEqual(telemetry.slice(-telemetryAfter.length), telemetryAfter);
 
 // A DATA packet with a bad packet CRC is discarded and recovered by parity.
-const corruptData1 = packet(constants.TYPE_DATA, 1, total, data1);
+const corruptData1 = packet(PACKET_TYPE_DATA, 1, total, data1);
 corruptData1[corruptData1.length - 1] ^= 0x01;
 const corruptStream = concat(
   new TextEncoder().encode("IMG_BEGIN\n"),
-  packet(constants.TYPE_START, 0, total, startPayload),
+  packet(PACKET_TYPE_START, 0, total, startPayload),
   corruptData1,
-  packet(constants.TYPE_DATA, 2, total, data2),
-  packet(constants.TYPE_PARITY, dataCount + 1, total, parity),
-  packet(constants.TYPE_END, total - 1, total)
+  packet(PACKET_TYPE_DATA, 2, total, data2),
+  packet(PACKET_TYPE_PARITY, dataCount + 1, total, parity),
+  packet(PACKET_TYPE_END, total - 1, total)
 );
 let corruptionRecovered = null;
 const warnings = [];
@@ -121,6 +126,25 @@ assert.ok(warnings.some(message => message.includes("CRC")));
 assert.ok(corruptionRecovered);
 assert.deepEqual(corruptionRecovered.image, image);
 assert.equal(corruptionRecovered.recoveredSequence, 1);
+
+// Two missing DATA packets exceed the parity recovery capability. The error is
+// reported, and a later telemetry chunk is still delivered instead of stopping
+// the receiver.
+const unrecoverableErrors = [];
+const telemetryAfterFailure = [];
+const unrecoverableReceiver = new StreamReceiver({
+  onTelemetryBytes: bytes => telemetryAfterFailure.push(bytes),
+  onError: message => unrecoverableErrors.push(message),
+});
+unrecoverableReceiver.push(concat(
+  new TextEncoder().encode("IMG_BEGIN\n"),
+  packet(PACKET_TYPE_START, 0, total, startPayload),
+  packet(PACKET_TYPE_PARITY, dataCount + 1, total, parity),
+  packet(PACKET_TYPE_END, total - 1, total),
+));
+assert.ok(unrecoverableErrors.some(message => message.includes("Cannot recover image")));
+unrecoverableReceiver.push(telemetryAfter);
+assert.deepEqual(concat(...telemetryAfterFailure), telemetryAfter);
 
 assert.equal(crc16(new TextEncoder().encode("123456789")), 0x29B1);
 
@@ -160,5 +184,7 @@ assert.equal(decoded.solarArrayVoltageV, 4.2);
 assert.equal(decoded.solarCurrentA, 0.123);
 assert.equal(decoded.busCurrentA, 0.456);
 assert.equal(decoded.chargeCurrentA, 0.078);
+decoderContext.input = new Uint8Array([0x01, 0x02]);
+assert.equal(vm.runInContext("decodeHkPayload(input, 0x11)", decoderContext), null);
 
 console.log("HEPTA telemetry/image protocol tests passed");

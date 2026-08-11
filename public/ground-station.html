@@ -2475,7 +2475,6 @@
     }
   </script>
   <script src="natural-earth-land-110m.js"></script>
-  <script src="hepta-image-receiver.js"></script>
 
   <script>
     /* =========================
@@ -2717,7 +2716,7 @@
       receivedImageUrl = "";
     }
 
-    const imageStreamReceiver = new HeptaImage.StreamReceiver({
+    const imageStreamCallbacks = {
       onTelemetryBytes(bytes) {
         handleReceivedSerialBytes(bytes);
         handleReceivedSerialText(telemetryTextDecoder.decode(bytes, { stream: true }));
@@ -2757,7 +2756,29 @@
         setImageStatus(`写真受信エラー: ${message}`, true);
         if (imageReceiveProgress) imageReceiveProgress.textContent = "受信失敗";
       }
-    });
+    };
+    let imageStreamReceiver = null;
+    let pendingImageReceiverChunks = [];
+    let pendingImageReceiverBytes = 0;
+    const MAX_PENDING_IMAGE_RECEIVER_BYTES = 1024 * 1024;
+
+    import("./hepta-image-receiver.js")
+      .then(({ StreamReceiver }) => {
+        imageStreamReceiver = new StreamReceiver(imageStreamCallbacks);
+        for (const bytes of pendingImageReceiverChunks) imageStreamReceiver.push(bytes);
+        pendingImageReceiverChunks = [];
+        pendingImageReceiverBytes = 0;
+      })
+      .catch(error => {
+        console.error("画像受信moduleを読み込めませんでした", error);
+        setImageStatus("写真受信機能を読み込めませんでした", true);
+        for (const bytes of pendingImageReceiverChunks) {
+          handleReceivedSerialBytes(bytes);
+          handleReceivedSerialText(telemetryTextDecoder.decode(bytes, { stream: true }));
+        }
+        pendingImageReceiverChunks = [];
+        pendingImageReceiverBytes = 0;
+      });
 
     function byteToHex(byte) {
       return Number(byte & 0xFF).toString(16).toUpperCase().padStart(2, "0");
@@ -4462,7 +4483,17 @@
             // Demultiplex Lab5-05 image packets before feeding the existing
             // binary/text telemetry parsers. This keeps reception asynchronous
             // and prevents JPEG bytes from being mistaken for telemetry.
-            imageStreamReceiver.push(value);
+            if (imageStreamReceiver) {
+              imageStreamReceiver.push(value);
+            } else if (pendingImageReceiverBytes + value.length <= MAX_PENDING_IMAGE_RECEIVER_BYTES) {
+              const copy = value.slice();
+              pendingImageReceiverChunks.push(copy);
+              pendingImageReceiverBytes += copy.length;
+            } else {
+              // Module startup must never stop ordinary telemetry reception.
+              handleReceivedSerialBytes(value);
+              handleReceivedSerialText(telemetryTextDecoder.decode(value, { stream: true }));
+            }
           }
         }
       } catch (error) {
@@ -4692,7 +4723,9 @@
     async function disconnectXbeePort() {
       xbeeReadLoopActive = false;
       stopSimulatedRssi();
-      imageStreamReceiver.reset();
+      imageStreamReceiver?.reset();
+      pendingImageReceiverChunks = [];
+      pendingImageReceiverBytes = 0;
 
       try {
         if (xbeeReader) {
