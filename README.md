@@ -72,14 +72,32 @@ Open `http://localhost:8080/` in Chrome or Edge. Web Serial requires a secure co
 ## HEPTA XBee, telemetry, and Lab compatibility
 
 Web Serial opens the XBee adapter at **38400 baud**, matching the existing
-HEPTA training XBee pair. The binary frame format and value conversions match
-`HEPTA-SAT-Flight-Software/GS/Hepta_sat_flightsoftware/main.cpp`. The receiver buffers arbitrary
-Web Serial chunks until LF, matching the line-oriented behavior of HEPTA-SAT Serial
-Monitor. It accepts both the Lab5-03 `TEMP=...,BUS=...,V5=...` line and Flightware
-`V=...,TEMP=...,AX=...` fields. Received hardware telemetry is displayed during
-bench tests regardless of the simulated satellite elevation.
+HEPTA training XBee pair. The current Flight Software sends the same
+CRLF-terminated text records as the Lab repositories. The receiver buffers
+arbitrary Web Serial chunks until LF, matching HEPTA-SAT Serial Monitor.
+Received hardware telemetry is displayed during bench tests regardless of the
+simulated satellite elevation.
 
-Binary HK telemetry accepts all of the following payload lengths:
+The exact Lab5-03 HK record is:
+
+```text
+TEMP=...,BUS=...,V5=...,V3V3=...,SAP=...,ISOL=...,IBUS=...,ICHG=...
+```
+
+After `a`, the Mission record extends the Lab5-04 acceleration fields with the
+remaining BNO055 axes:
+
+```text
+AX=...,AY=...,AZ=...,GX=...,GY=...,GZ=...,MX=...,MY=...,MZ=...
+```
+
+The parser updates only valid fields, retains prior values when a record is
+partial, and ignores unknown or non-numeric assignments. HK and nine-axis
+values are added to the existing history graphs with V, A, °C, m/s², deg/s,
+and µT units.
+
+For compatibility with earlier HEPTA-SAT Flight Software, the existing binary
+frame decoder remains available. It accepts the following payload lengths:
 
 - 5 bytes: legacy bus voltage and temperature
 - 23 bytes: legacy bus voltage, temperature, and nine-axis data
@@ -91,12 +109,10 @@ conversions remain unchanged: bus voltage ADC count
 (`V / (3.3 * 1.431) * 4096`), temperature (`degC * 10`), acceleration
 (`m/s2 / 9.8 * 512`), gyro (`deg/s * 2048 / 125`), and integer magnetometer µT.
 
-The text receiver also accepts the exact Lab5-03 line fields:
-`TEMP,BUS,V5,V3V3,SAP,ISOL,IBUS,ICHG`. Missing, unknown, or non-numeric fields
-are ignored without clearing valid telemetry already on screen.
-
-Commands `a`, `b`, and `p` are sent as single characters. `p` starts the
-Lab5-05 JPEG protocol:
+Commands `a`, `b`, and `p` are restricted to one character and are sent as
+plain bytes with no line ending, matching HEPTA-SAT Serial Monitor and the Lab
+sketches. `a` selects Mission, `b` selects Standby, and `p` starts the Lab5-05
+JPEG protocol:
 
 ```text
 IMG_BEGIN\n

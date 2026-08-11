@@ -58,8 +58,12 @@ const parity = new Uint8Array(payloadSize);
 for (let i = 0; i < data1.length; i++) parity[i] ^= data1[i];
 for (let i = 0; i < data2.length; i++) parity[i] ^= data2[i];
 
-const telemetryBefore = new Uint8Array([0x7E, 1, 0x10, 0, 1, 5, 0, 1, 2, 3, 4, 16]);
-const telemetryAfter = new Uint8Array([0x7E, 1, 0x11, 0, 2, 5, 1, 4, 5, 6, 7, 31]);
+const telemetryBefore = new TextEncoder().encode(
+  "TEMP=23.40,BUS=3.780,V5=5.001,V3V3=3.301,SAP=4.120,ISOL=0.104,IBUS=0.217,ICHG=0.031\r\n",
+);
+const telemetryAfter = new TextEncoder().encode(
+  "AX=0.01,AY=-0.03,AZ=9.80,GX=0.10,GY=0.20,GZ=-0.10,MX=21.00,MY=-4.00,MZ=38.00\r\n",
+);
 const stream = concat(
   telemetryBefore,
   new TextEncoder().encode("IMG_BEGIN\n"),
@@ -162,6 +166,18 @@ function extractFunction(source, name) {
 }
 
 const html = fs.readFileSync(new URL("../public/ground-station.html", import.meta.url), "utf8");
+
+// The command UI must accept the three single-byte Lab commands, including p.
+const commandIdsSource = html.match(/commandIds:\s*{([\s\S]*?)}/)?.[1] || "";
+const commandIds = Object.fromEntries(
+  [...commandIdsSource.matchAll(/([abp]):\s*(0x[0-9a-f]+)/gi)]
+    .map(match => [match[1], Number(match[2])]),
+);
+assert.deepEqual(Object.keys(commandIds).sort(), ["a", "b", "p"]);
+assert.match(html, /placeholder="[^"]*a \/ b \/ p[^"]*"/);
+assert.match(html, /id="command-input"[^>]*maxlength="1"/);
+assert.match(html, /DIRECT_SERIAL_COMMAND_LINE_ENDING\s*=\s*""/);
+
 const decoderSource = ["byteToHex", "readInt16BE", "decodeMode", "decodePacketTypeMode", "decodeHkPayload"]
   .map(name => extractFunction(html, name))
   .join("\n");
@@ -186,5 +202,51 @@ assert.equal(decoded.busCurrentA, 0.456);
 assert.equal(decoded.chargeCurrentA, 0.078);
 decoderContext.input = new Uint8Array([0x01, 0x02]);
 assert.equal(vm.runInContext("decodeHkPayload(input, 0x11)", decoderContext), null);
+
+// Exercise the production text parser with the exact Flight/Lab field names.
+const textTelemetryState = {
+  voltageV: null,
+  temperatureC: null,
+  voltage5V: null,
+  voltage3v3: null,
+  solarArrayVoltageV: null,
+  solarCurrentA: null,
+  busCurrentA: null,
+  chargeCurrentA: null,
+  accX: null,
+  accY: null,
+  accZ: null,
+  gyroX: null,
+  gyroY: null,
+  gyroZ: null,
+  magX: null,
+  magY: null,
+  magZ: null,
+  receivedNumber: null,
+};
+let displayedTextTelemetry = null;
+const textDecoderContext = {
+  backendTelemetryState: textTelemetryState,
+  isTelemetryDisplayAllowed: () => true,
+  updateTelemetryDisplayFromObject: state => { displayedTextTelemetry = { ...state }; },
+};
+vm.createContext(textDecoderContext);
+vm.runInContext(extractFunction(html, "updateTelemetryDisplayFromBackendText"), textDecoderContext);
+textDecoderContext.input = "TEMP=23.40,BUS=3.780,V5=5.001,V3V3=3.301,SAP=4.120,ISOL=0.104,IBUS=0.217,ICHG=0.031";
+assert.equal(vm.runInContext("updateTelemetryDisplayFromBackendText(input)", textDecoderContext), true);
+assert.equal(displayedTextTelemetry.temperatureC, 23.4);
+assert.equal(displayedTextTelemetry.voltageV, 3.78);
+assert.equal(displayedTextTelemetry.voltage5V, 5.001);
+assert.equal(displayedTextTelemetry.chargeCurrentA, 0.031);
+
+textDecoderContext.input = "AX=0.01,AY=-0.03,AZ=9.80,GX=0.10,GY=0.20,GZ=-0.10,MX=21.00,MY=-4.00,MZ=38.00";
+assert.equal(vm.runInContext("updateTelemetryDisplayFromBackendText(input)", textDecoderContext), true);
+assert.equal(displayedTextTelemetry.accZ, 9.8);
+assert.equal(displayedTextTelemetry.gyroZ, -0.1);
+assert.equal(displayedTextTelemetry.magY, -4);
+
+textDecoderContext.input = "TEMP=broken,UNKNOWN=12";
+assert.equal(vm.runInContext("updateTelemetryDisplayFromBackendText(input)", textDecoderContext), false);
+assert.equal(displayedTextTelemetry.temperatureC, 23.4);
 
 console.log("HEPTA telemetry/image protocol tests passed");
