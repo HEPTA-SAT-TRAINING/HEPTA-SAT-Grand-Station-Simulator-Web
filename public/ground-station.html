@@ -413,7 +413,7 @@
 
     .antenna-area {
       display: grid;
-      grid-template-columns: minmax(0, 42%) minmax(0, 58%);
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
       gap: 8px;
       min-height: 0;
       min-width: 0;
@@ -814,18 +814,18 @@
 
     .azel-split-body {
       display: grid;
-      grid-template-rows: none;
-      grid-auto-rows: minmax(208px, auto);
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: unset;
       gap: 5px;
       padding: 3px 2px;
-      overflow-y: auto;
+      overflow-y: hidden;
       overflow-x: hidden;
-      align-content: start;
+      align-content: stretch;
     }
 
     .mini-graph-box {
       position: relative;
-      min-height: 208px;
+      min-height: 0;
       border: 1px solid rgba(45, 70, 84, 0.8);
       border-radius: 4px;
       overflow: hidden;
@@ -846,7 +846,7 @@
 
     .mini-graph-canvas-wrap {
       position: relative;
-      min-height: 184px;
+      min-height: 0;
       overflow: hidden;
     }
 
@@ -1568,6 +1568,21 @@
       overflow-wrap: anywhere;
     }
 
+    .image-receive-progress {
+      display: grid;
+      gap: 6px;
+    }
+
+    .image-receive-progress-bar {
+      width: 100%;
+      height: 13px;
+      accent-color: #0568d8;
+    }
+
+    .image-receive-progress-bar:not([value]) {
+      accent-color: #f2a400;
+    }
+
     .image-receive-status.error {
       color: #b42318;
       border-color: rgba(180, 35, 24, 0.35);
@@ -2156,19 +2171,19 @@
     }
 
     .azel-split-body {
-      grid-template-rows: none;
-      grid-auto-rows: minmax(208px, auto);
-      align-content: start;
-      overflow-y: auto;
+      grid-template-rows: repeat(2, minmax(0, 1fr));
+      grid-auto-rows: unset;
+      align-content: stretch;
+      overflow-y: hidden;
       overflow-x: hidden;
     }
 
     .mini-graph-box {
-      min-height: 208px;
+      min-height: 0;
     }
 
     .mini-graph-canvas-wrap {
-      min-height: 184px;
+      min-height: 0;
     }
 
     .tracking-body {
@@ -2517,7 +2532,10 @@
           <div class="panel-body image-receive-body">
             <div class="image-receive-info">
               <div class="image-receive-status" id="image-receive-status">pコマンドで写真を取得できます</div>
-              <div class="image-receive-progress" id="image-receive-progress">待機中</div>
+              <div class="image-receive-progress" id="image-receive-progress">
+                <span id="image-receive-progress-text">待機中</span>
+                <progress class="image-receive-progress-bar" id="image-receive-progress-bar" max="1" value="0" hidden></progress>
+              </div>
               <a class="gs-button image-download-link" id="image-download-link" download="hepta-picture.jpg" hidden>JPEGを保存</a>
             </div>
             <div class="image-receive-preview">
@@ -2690,7 +2708,8 @@
     const commandLogList = document.getElementById("command-log-list");
     const commandLogHeader = document.querySelector(".command-log-header");
     const imageReceiveStatus = document.getElementById("image-receive-status");
-    const imageReceiveProgress = document.getElementById("image-receive-progress");
+    const imageReceiveProgressText = document.getElementById("image-receive-progress-text");
+    const imageReceiveProgressBar = document.getElementById("image-receive-progress-bar");
     const imageReceivePreview = document.getElementById("image-receive-preview");
     const imageDownloadLink = document.getElementById("image-download-link");
     let receivedImageUrl = "";
@@ -2852,9 +2871,16 @@
       }
 
       const hasOrbitSelection = visiblePanelIds.has("orbit-selection");
-      const hasTracking = visiblePanelIds.has("tracking") || visiblePanelIds.has("azel");
+      const hasTrackingVisual = visiblePanelIds.has("tracking");
+      const hasAzelGraph = visiblePanelIds.has("azel");
+      const hasTracking = hasTrackingVisual || hasAzelGraph;
       if (topLeftArea) topLeftArea.hidden = !hasOrbitSelection;
       if (antennaArea) antennaArea.hidden = !hasTracking;
+      if (antennaArea) {
+        antennaArea.style.gridTemplateColumns = hasTrackingVisual && hasAzelGraph
+          ? "minmax(0, 1fr) minmax(0, 1fr)"
+          : "1fr";
+      }
 
       if (topArea) {
         const topCount = [topLeftArea, topArea.querySelector("[data-panel-id=orbit-map]"), antennaArea]
@@ -2977,12 +3003,22 @@
       },
       onBegin() {
         setImageStatus("写真データを受信しています");
-        if (imageReceiveProgress) imageReceiveProgress.textContent = "START待ち";
+        if (imageReceiveProgressText) imageReceiveProgressText.textContent = "START待ち";
+        if (imageReceiveProgressBar) {
+          imageReceiveProgressBar.hidden = false;
+          imageReceiveProgressBar.removeAttribute("value");
+        }
         markMatchingExpectedAck("IMG_BEGIN");
       },
       onProgress(summary) {
-        if (!imageReceiveProgress) return;
-        imageReceiveProgress.textContent = `${summary.receivedBytes} / ${summary.imageSize} bytes (${summary.receivedCount}/${summary.dataPacketCount} packet)`;
+        if (imageReceiveProgressText) {
+          imageReceiveProgressText.textContent = `${summary.receivedBytes} / ${summary.imageSize} bytes (${summary.receivedCount}/${summary.dataPacketCount} packet)`;
+        }
+        if (imageReceiveProgressBar && Number.isFinite(summary.imageSize) && summary.imageSize > 0) {
+          imageReceiveProgressBar.hidden = false;
+          imageReceiveProgressBar.max = summary.imageSize;
+          imageReceiveProgressBar.value = Math.min(summary.receivedBytes, summary.imageSize);
+        }
       },
       onWarning(message) {
         setImageStatus(`受信警告: ${message}`, true);
@@ -3004,11 +3040,18 @@
           ? ""
           : ` / packet ${result.recoveredSequence}をparityで復元`;
         setImageStatus(`受信完了: JPEG ${result.meta.imageSize} bytes / CRC OK${recovery}`);
-        if (imageReceiveProgress) imageReceiveProgress.textContent = "完了";
+        if (imageReceiveProgressText) imageReceiveProgressText.textContent = "完了";
+        if (imageReceiveProgressBar) {
+          imageReceiveProgressBar.hidden = false;
+          imageReceiveProgressBar.max = result.meta.imageSize;
+          imageReceiveProgressBar.value = result.meta.imageSize;
+        }
       },
       onError(message) {
+        markMatchingExpectedAck("IMG_BEGIN");
         setImageStatus(`写真受信エラー: ${message}`, true);
-        if (imageReceiveProgress) imageReceiveProgress.textContent = "受信失敗";
+        if (imageReceiveProgressText) imageReceiveProgressText.textContent = "受信失敗";
+        if (imageReceiveProgressBar) imageReceiveProgressBar.hidden = true;
       }
     };
     let imageStreamReceiver = null;
@@ -4615,6 +4658,15 @@
       renderCommandLog();
     }
 
+    function showPictureCapturePending() {
+      setImageStatus("カメラ撮影中: IMG_BEGIN待ち");
+      if (imageReceiveProgressText) imageReceiveProgressText.textContent = "撮影・送信準備中";
+      if (imageReceiveProgressBar) {
+        imageReceiveProgressBar.hidden = false;
+        imageReceiveProgressBar.removeAttribute("value");
+      }
+    }
+
     async function sendXbeeCommand() {
       if (!commandInput) return;
 
@@ -4653,6 +4705,7 @@
             expectedAck: String(result.expected_ack || "").toUpperCase(),
             ackReceived: false
           });
+          if (commandText === "p") showPictureCapturePending();
           commandInput.value = "";
           commandInput.focus();
         } catch (error) {
@@ -4687,6 +4740,7 @@
           expectedAck: getExpectedAckLabel(packetInfo.command),
           ackReceived: false
         });
+        if (packetInfo.command === "p") showPictureCapturePending();
         commandInput.value = "";
         commandInput.focus();
       } catch (error) {

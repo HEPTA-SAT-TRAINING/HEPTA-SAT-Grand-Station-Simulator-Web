@@ -176,6 +176,9 @@ assert.match(html, /id="graph-selector-trigger"/);
 assert.match(html, /data-graph-toggle=/);
 assert.match(html, /hepta-gs-visible-graphs-v1/);
 assert.match(html, /DEFAULT_VISIBLE_GRAPHS\s*=\s*new Set/);
+assert.match(html, /id="image-receive-progress-bar"/);
+assert.match(html, /imageReceiveProgressBar\.value/);
+assert.match(html, /grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\)/);
 
 // The command UI must accept the three single-byte Lab commands, including p.
 const commandIdsSource = html.match(/commandIds:\s*{([\s\S]*?)}/)?.[1] || "";

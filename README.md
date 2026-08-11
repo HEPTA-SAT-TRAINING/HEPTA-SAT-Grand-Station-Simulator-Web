@@ -147,6 +147,12 @@ is also restored after a reload. This keeps the default dashboard readable
 while still allowing every received telemetry series to be inspected when
 needed.
 
+During a `p` command the photo panel first shows an indeterminate capture
+state. Once the Serial Monitor `START` packet is received it switches to a
+byte-based progress bar (`received bytes / image bytes`) and packet count. A
+capture or transfer error is reported in the same panel instead of leaving a
+permanent `WAIT` state.
+
 ## Verification
 
 Run the mock protocol test with Node.js:
