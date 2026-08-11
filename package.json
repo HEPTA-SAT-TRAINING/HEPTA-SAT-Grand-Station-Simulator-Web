@@ -1,0 +1,7 @@
+{
+  "name": "hepta-sat-grand-station-simulator-web",
+  "private": true,
+  "scripts": {
+    "test": "node tests/verify-protocol.mjs"
+  }
+}

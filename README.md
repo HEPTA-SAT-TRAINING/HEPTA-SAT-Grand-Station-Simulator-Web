@@ -11,6 +11,8 @@ https://hepta-sat-training.github.io/HEPTA-SAT-Grand-Station-Simulator-Web/
 - Real-time ground station dashboard
 - Satellite orbit and ground-track visualization
 - Telemetry reception, decoding, and display
+- HEPTA-SAT V4.1.1 EPS and nine-axis history graphs
+- JPEG reception with packet/image CRC validation and one-packet parity recovery
 - Web Serial communication with supported serial devices
 - Modular feature selector for future extensions
 
@@ -21,6 +23,8 @@ https://hepta-sat-training.github.io/HEPTA-SAT-Grand-Station-Simulator-Web/
 - `app.js`: Feature selection logic
 - `styles.css`: Application shell and feature selector styles
 - `public/ground-station.html`: Ground station interface
+- `public/hepta-image-receiver.js`: Lab5-05 image stream demultiplexer and assembler
+- `tests/verify-protocol.mjs`: fragmented serial/image protocol mock test
 - `public/`: Maps, orbit libraries, and Three.js assets
 - `.github/workflows/pages.yml`: GitHub Pages deployment workflow
 
@@ -42,7 +46,7 @@ python3 -m http.server 8080
 
 Open `http://localhost:8080/` in Chrome or Edge. Web Serial requires a secure context, such as HTTPS or localhost, and a compatible browser.
 
-## HEPTA XBee / Lab5-03 compatibility
+## HEPTA XBee, telemetry, and Lab compatibility
 
 Web Serial opens the XBee adapter at **38400 baud**, matching the existing
 HEPTA training XBee pair. The binary frame format and value conversions match
@@ -52,6 +56,47 @@ Monitor. It accepts both the Lab5-03 `TEMP=...,BUS=...,V5=...` line and Flightwa
 `V=...,TEMP=...,AX=...` fields. Received hardware telemetry is displayed during
 bench tests regardless of the simulated satellite elevation.
 
-Binary HK telemetry uses the reference 30-byte frame and conversions: voltage
-ADC count (`V / (3.3 * 1.431) * 4096`), temperature (`degC * 10`), acceleration
-(`m/s2 / 9.8 * 512`), gyro (`deg/s * 2048 / 125`), and integer magnetometer uT.
+Binary HK telemetry accepts all of the following payload lengths:
+
+- 5 bytes: legacy bus voltage and temperature
+- 23 bytes: legacy bus voltage, temperature, and nine-axis data
+- 35 bytes: the same 23-byte prefix plus Lab5-03 EPS data
+
+The 35-byte payload appends unsigned-millivolt `V5`, `V3V3`, and `SAP`, then
+signed-milliamp `ISOL`, `IBUS`, and `ICHG` fields. Existing offsets and value
+conversions remain unchanged: bus voltage ADC count
+(`V / (3.3 * 1.431) * 4096`), temperature (`degC * 10`), acceleration
+(`m/s2 / 9.8 * 512`), gyro (`deg/s * 2048 / 125`), and integer magnetometer µT.
+
+The text receiver also accepts the exact Lab5-03 line fields:
+`TEMP,BUS,V5,V3V3,SAP,ISOL,IBUS,ICHG`. Missing, unknown, or non-numeric fields
+are ignored without clearing valid telemetry already on screen.
+
+Commands `a`, `b`, and `p` are sent as single characters. `p` starts the
+Lab5-05 JPEG protocol:
+
+```text
+IMG_BEGIN\n
+HP START/DATA/PARITY/END packets
+\nIMG_END\n
+```
+
+The receiver accepts arbitrary Web Serial chunk boundaries, validates each
+packet with CRC-16/CCITT-FALSE, validates the complete JPEG CRC and SOI/EOI
+markers, and uses the XOR parity packet to recover one missing/corrupt DATA
+packet. Images are limited to 4,194,048 bytes by the 64-byte payload and
+16-bit packet-count fields. Packet timeout is 10 seconds and overall
+image timeout is 60 seconds. Image processing is event-driven, so the page UI
+remains responsive during reception.
+
+## Verification
+
+Run the mock protocol test with Node.js:
+
+```bash
+npm test
+```
+
+It verifies arbitrary stream fragmentation, image reconstruction, CRC-16,
+one-packet parity recovery, and preservation of telemetry bytes before and
+after an image transfer.

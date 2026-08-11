@@ -1434,6 +1434,62 @@
       text-align: center;
     }
 
+    .image-receive-body {
+      display: grid;
+      grid-template-columns: minmax(180px, 1fr) minmax(220px, 1.4fr);
+      gap: 10px;
+      min-height: 220px;
+    }
+
+    .image-receive-info {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .image-receive-status,
+    .image-receive-progress {
+      border: 1px solid rgba(34, 105, 196, 0.28);
+      border-radius: 5px;
+      padding: 9px;
+      background: rgba(255, 255, 255, 0.82);
+      color: #073474;
+      overflow-wrap: anywhere;
+    }
+
+    .image-receive-status.error {
+      color: #b42318;
+      border-color: rgba(180, 35, 24, 0.35);
+    }
+
+    .image-receive-preview {
+      min-height: 190px;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(34, 105, 196, 0.28);
+      border-radius: 5px;
+      background: rgba(245, 248, 252, 0.9);
+      overflow: hidden;
+    }
+
+    .image-receive-preview img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      max-height: 360px;
+      object-fit: contain;
+    }
+
+    .image-download-link[hidden] {
+      display: none;
+    }
+
+    @media (max-width: 760px) {
+      .image-receive-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
     .pass-select-dialog-backdrop {
       position: fixed;
       inset: 0;
@@ -2258,6 +2314,31 @@
               </div>
 
               <div class="tm-value-card">
+                <div class="tm-value-label">5V系電圧</div>
+                <div class="tm-value-main" id="tm-v5-value">-- V</div>
+              </div>
+              <div class="tm-value-card">
+                <div class="tm-value-label">3.3V系電圧</div>
+                <div class="tm-value-main" id="tm-v3v3-value">-- V</div>
+              </div>
+              <div class="tm-value-card">
+                <div class="tm-value-label">太陽電池電圧</div>
+                <div class="tm-value-main" id="tm-sap-value">-- V</div>
+              </div>
+              <div class="tm-value-card">
+                <div class="tm-value-label">太陽電池電流</div>
+                <div class="tm-value-main" id="tm-isol-value">-- A</div>
+              </div>
+              <div class="tm-value-card">
+                <div class="tm-value-label">BUS電流</div>
+                <div class="tm-value-main" id="tm-ibus-value">-- A</div>
+              </div>
+              <div class="tm-value-card">
+                <div class="tm-value-label">充電電流</div>
+                <div class="tm-value-main" id="tm-ichg-value">-- A</div>
+              </div>
+
+              <div class="tm-value-card">
                 <div class="tm-value-label">AX</div>
                 <div class="tm-value-main" id="tm-acc-x-value">--</div>
               </div>
@@ -2307,10 +2388,24 @@
         </div>
 
         <div class="panel">
+          <div class="panel-title">写真受信</div>
+          <div class="panel-body image-receive-body">
+            <div class="image-receive-info">
+              <div class="image-receive-status" id="image-receive-status">pコマンドで写真を取得できます</div>
+              <div class="image-receive-progress" id="image-receive-progress">待機中</div>
+              <a class="gs-button image-download-link" id="image-download-link" download="hepta-picture.jpg" hidden>JPEGを保存</a>
+            </div>
+            <div class="image-receive-preview">
+              <img id="image-receive-preview" alt="受信したHEPTA-SAT写真" hidden>
+            </div>
+          </div>
+        </div>
+
+        <div class="panel">
           <div class="panel-title">コマンドログ</div>
           <div class="panel-body command-body">
             <div class="command-input-area">
-              <input id="command-input" class="command-input" type="text" placeholder="コマンド入力欄 例: a / b" autocomplete="off">
+              <input id="command-input" class="command-input" type="text" placeholder="コマンド入力欄 例: a / b / p" autocomplete="off" maxlength="1">
               <button class="gs-button command-send-button" id="command-send-button">送信</button>
             </div>
 
@@ -2380,6 +2475,7 @@
     }
   </script>
   <script src="natural-earth-land-110m.js"></script>
+  <script src="hepta-image-receiver.js"></script>
 
   <script>
     /* =========================
@@ -2469,6 +2565,11 @@
     const commandSendButton = document.getElementById("command-send-button");
     const commandLogList = document.getElementById("command-log-list");
     const commandLogHeader = document.querySelector(".command-log-header");
+    const imageReceiveStatus = document.getElementById("image-receive-status");
+    const imageReceiveProgress = document.getElementById("image-receive-progress");
+    const imageReceivePreview = document.getElementById("image-receive-preview");
+    const imageDownloadLink = document.getElementById("image-download-link");
+    let receivedImageUrl = "";
     let commandLogHistory = [];
     let lastDisplayedCommandAckKey = "";
     let lastDisplayedCommandTxKey = "";
@@ -2501,6 +2602,12 @@
       tmVoltageRaw: document.getElementById("tm-voltage-raw"),
       tmTempValue: document.getElementById("tm-temp-value"),
       tmTempRaw: document.getElementById("tm-temp-raw"),
+      tmV5Value: document.getElementById("tm-v5-value"),
+      tmV3v3Value: document.getElementById("tm-v3v3-value"),
+      tmSapValue: document.getElementById("tm-sap-value"),
+      tmIsolValue: document.getElementById("tm-isol-value"),
+      tmIbusValue: document.getElementById("tm-ibus-value"),
+      tmIchgValue: document.getElementById("tm-ichg-value"),
       tmAccXValue: document.getElementById("tm-acc-x-value"),
       tmAccYValue: document.getElementById("tm-acc-y-value"),
       tmAccZValue: document.getElementById("tm-acc-z-value"),
@@ -2526,6 +2633,7 @@
       typeHk: 0x10,
       basicPayloadLength: 5,
       missionPayloadLength: 23,
+      extendedPayloadLength: 35,
       telemetryTypes: [0x10, 0x11, 0x12, 0x20, 0x30],
       types: {
         0x10: "Standby Telemetry",
@@ -2543,11 +2651,13 @@
       parameter: 0x00,
       commandIds: {
         a: 0x11,
-        b: 0x12
+        b: 0x12,
+        p: 0x13
       },
       labels: {
         a: "MISSION_MODE",
-        b: "STANDBY_MODE"
+        b: "STANDBY_MODE",
+        p: "PICTURE_CAPTURE"
       }
     };
 
@@ -2574,6 +2684,12 @@
     const backendTelemetryState = {
       voltageV: null,
       temperatureC: null,
+      voltage5V: null,
+      voltage3v3: null,
+      solarArrayVoltageV: null,
+      solarCurrentA: null,
+      busCurrentA: null,
+      chargeCurrentA: null,
       accX: null,
       accY: null,
       accZ: null,
@@ -2588,6 +2704,60 @@
     let currentTelemetryModeDisplay = { text: "Standby", className: "normal" };
     let lastBackendRawHexKey = "";
     let lastBackendDataKey = "";
+    const telemetryTextDecoder = new TextDecoder();
+
+    function setImageStatus(message, isError = false) {
+      if (!imageReceiveStatus) return;
+      imageReceiveStatus.textContent = message;
+      imageReceiveStatus.classList.toggle("error", isError);
+    }
+
+    function clearReceivedImageUrl() {
+      if (receivedImageUrl) URL.revokeObjectURL(receivedImageUrl);
+      receivedImageUrl = "";
+    }
+
+    const imageStreamReceiver = new HeptaImage.StreamReceiver({
+      onTelemetryBytes(bytes) {
+        handleReceivedSerialBytes(bytes);
+        handleReceivedSerialText(telemetryTextDecoder.decode(bytes, { stream: true }));
+      },
+      onBegin() {
+        setImageStatus("写真データを受信しています");
+        if (imageReceiveProgress) imageReceiveProgress.textContent = "START待ち";
+        markMatchingExpectedAck("IMG_BEGIN");
+      },
+      onProgress(summary) {
+        if (!imageReceiveProgress) return;
+        imageReceiveProgress.textContent = `${summary.receivedBytes} / ${summary.imageSize} bytes (${summary.receivedCount}/${summary.dataPacketCount} packet)`;
+      },
+      onWarning(message) {
+        setImageStatus(`受信警告: ${message}`, true);
+      },
+      onComplete(result) {
+        clearReceivedImageUrl();
+        const blob = new Blob([result.image], { type: "image/jpeg" });
+        receivedImageUrl = URL.createObjectURL(blob);
+        if (imageReceivePreview) {
+          imageReceivePreview.src = receivedImageUrl;
+          imageReceivePreview.hidden = false;
+        }
+        if (imageDownloadLink) {
+          imageDownloadLink.href = receivedImageUrl;
+          imageDownloadLink.download = `hepta-picture-${result.meta.imageId}.jpg`;
+          imageDownloadLink.hidden = false;
+        }
+        const recovery = result.recoveredSequence === null
+          ? ""
+          : ` / packet ${result.recoveredSequence}をparityで復元`;
+        setImageStatus(`受信完了: JPEG ${result.meta.imageSize} bytes / CRC OK${recovery}`);
+        if (imageReceiveProgress) imageReceiveProgress.textContent = "完了";
+      },
+      onError(message) {
+        setImageStatus(`写真受信エラー: ${message}`, true);
+        if (imageReceiveProgress) imageReceiveProgress.textContent = "受信失敗";
+      }
+    });
 
     function byteToHex(byte) {
       return Number(byte & 0xFF).toString(16).toUpperCase().padStart(2, "0");
@@ -2661,7 +2831,8 @@
 
     function isTelemetryPayloadLength(payloadLength) {
       return payloadLength === TELEMETRY_PACKET.basicPayloadLength
-        || payloadLength === TELEMETRY_PACKET.missionPayloadLength;
+        || payloadLength === TELEMETRY_PACKET.missionPayloadLength
+        || payloadLength === TELEMETRY_PACKET.extendedPayloadLength;
     }
 
     function getPowerModeFromVoltage(voltageV) {
@@ -2714,6 +2885,13 @@
       const magXRaw = hasMissionTelemetry ? readInt16BE(payload[17], payload[18]) : null;
       const magYRaw = hasMissionTelemetry ? readInt16BE(payload[19], payload[20]) : null;
       const magZRaw = hasMissionTelemetry ? readInt16BE(payload[21], payload[22]) : null;
+      const hasExtendedHk = payload.length >= TELEMETRY_PACKET.extendedPayloadLength;
+      const voltage5Raw = hasExtendedHk ? ((payload[23] << 8) | payload[24]) : null;
+      const voltage3v3Raw = hasExtendedHk ? ((payload[25] << 8) | payload[26]) : null;
+      const solarArrayVoltageRaw = hasExtendedHk ? ((payload[27] << 8) | payload[28]) : null;
+      const solarCurrentRaw = hasExtendedHk ? readInt16BE(payload[29], payload[30]) : null;
+      const busCurrentRaw = hasExtendedHk ? readInt16BE(payload[31], payload[32]) : null;
+      const chargeCurrentRaw = hasExtendedHk ? readInt16BE(payload[33], payload[34]) : null;
       const adcRes = 4096;
       const adcVref = 3.3;
       const voltageV = voltageRaw / adcRes * adcVref * 1.431;
@@ -2731,6 +2909,13 @@
         temperatureRaw,
         temperatureC: temperatureRaw / 10,
         temperatureHex: `${byteToHex(payload[3])} ${byteToHex(payload[4])}`,
+
+        voltage5V: voltage5Raw === null ? null : voltage5Raw / 1000,
+        voltage3v3: voltage3v3Raw === null ? null : voltage3v3Raw / 1000,
+        solarArrayVoltageV: solarArrayVoltageRaw === null ? null : solarArrayVoltageRaw / 1000,
+        solarCurrentA: solarCurrentRaw === null ? null : solarCurrentRaw / 1000,
+        busCurrentA: busCurrentRaw === null ? null : busCurrentRaw / 1000,
+        chargeCurrentA: chargeCurrentRaw === null ? null : chargeCurrentRaw / 1000,
 
         accX: accXRaw === null ? null : accXRaw / 512 * 9.8,
         accY: accYRaw === null ? null : accYRaw / 512 * 9.8,
@@ -2776,6 +2961,12 @@
       setTelemetryText(packetUi.tmVoltageRaw, `raw: ${decoded.voltageHex} = ${decoded.voltageRaw} ADC`);
       setTelemetryText(packetUi.tmTempValue, `${decoded.temperatureC.toFixed(1)} °C`);
       setTelemetryText(packetUi.tmTempRaw, `raw: ${decoded.temperatureHex} = ${decoded.temperatureRaw} /10`);
+      setTelemetryText(packetUi.tmV5Value, decoded.voltage5V === null ? "-- V" : `${decoded.voltage5V.toFixed(3)} V`);
+      setTelemetryText(packetUi.tmV3v3Value, decoded.voltage3v3 === null ? "-- V" : `${decoded.voltage3v3.toFixed(3)} V`);
+      setTelemetryText(packetUi.tmSapValue, decoded.solarArrayVoltageV === null ? "-- V" : `${decoded.solarArrayVoltageV.toFixed(3)} V`);
+      setTelemetryText(packetUi.tmIsolValue, decoded.solarCurrentA === null ? "-- A" : `${decoded.solarCurrentA.toFixed(3)} A`);
+      setTelemetryText(packetUi.tmIbusValue, decoded.busCurrentA === null ? "-- A" : `${decoded.busCurrentA.toFixed(3)} A`);
+      setTelemetryText(packetUi.tmIchgValue, decoded.chargeCurrentA === null ? "-- A" : `${decoded.chargeCurrentA.toFixed(3)} A`);
 
       setTelemetryText(packetUi.tmAccXValue, decoded.accX === null ? "--" : decoded.accX.toFixed(2) + " m/s2");
       setTelemetryText(packetUi.tmAccYValue, decoded.accY === null ? "--" : decoded.accY.toFixed(2) + " m/s2");
@@ -2819,6 +3010,12 @@
         modeClassName: source.modeClassName || currentTelemetryModeDisplay.className,
         voltageV: readNumeric("voltageV"),
         temperatureC: readNumeric("temperatureC"),
+        voltage5V: readNumeric("voltage5V"),
+        voltage3v3: readNumeric("voltage3v3"),
+        solarArrayVoltageV: readNumeric("solarArrayVoltageV"),
+        solarCurrentA: readNumeric("solarCurrentA"),
+        busCurrentA: readNumeric("busCurrentA"),
+        chargeCurrentA: readNumeric("chargeCurrentA"),
         accX: readNumeric("accX"),
         accY: readNumeric("accY"),
         accZ: readNumeric("accZ"),
@@ -2834,6 +3031,12 @@
       const hasAnyValue = [
         decoded.voltageV,
         decoded.temperatureC,
+        decoded.voltage5V,
+        decoded.voltage3v3,
+        decoded.solarArrayVoltageV,
+        decoded.solarCurrentA,
+        decoded.busCurrentA,
+        decoded.chargeCurrentA,
         decoded.accX,
         decoded.accY,
         decoded.accZ,
@@ -2859,6 +3062,13 @@
         setTelemetryText(packetUi.tmTempValue, `${decoded.temperatureC.toFixed(1)} °C`);
         setTelemetryText(packetUi.tmTempRaw, "raw: text telemetry");
       }
+
+      if (decoded.voltage5V !== null) setTelemetryText(packetUi.tmV5Value, `${decoded.voltage5V.toFixed(3)} V`);
+      if (decoded.voltage3v3 !== null) setTelemetryText(packetUi.tmV3v3Value, `${decoded.voltage3v3.toFixed(3)} V`);
+      if (decoded.solarArrayVoltageV !== null) setTelemetryText(packetUi.tmSapValue, `${decoded.solarArrayVoltageV.toFixed(3)} V`);
+      if (decoded.solarCurrentA !== null) setTelemetryText(packetUi.tmIsolValue, `${decoded.solarCurrentA.toFixed(3)} A`);
+      if (decoded.busCurrentA !== null) setTelemetryText(packetUi.tmIbusValue, `${decoded.busCurrentA.toFixed(3)} A`);
+      if (decoded.chargeCurrentA !== null) setTelemetryText(packetUi.tmIchgValue, `${decoded.chargeCurrentA.toFixed(3)} A`);
 
       if (decoded.accX !== null) setTelemetryText(packetUi.tmAccXValue, decoded.accX === null ? "--" : decoded.accX.toFixed(2) + " m/s2");
       if (decoded.accY !== null) setTelemetryText(packetUi.tmAccYValue, decoded.accY === null ? "--" : decoded.accY.toFixed(2) + " m/s2");
@@ -2901,6 +3111,12 @@
         VOLTAGE: "voltageV",
         T: "temperatureC",
         TEMP: "temperatureC",
+        V5: "voltage5V",
+        V3V3: "voltage3v3",
+        SAP: "solarArrayVoltageV",
+        ISOL: "solarCurrentA",
+        IBUS: "busCurrentA",
+        ICHG: "chargeCurrentA",
         AX: "accX",
         AY: "accY",
         AZ: "accZ",
@@ -2916,9 +3132,8 @@
       // Lab5-03 sends one CRLF-terminated CSV-style line:
       // TEMP=23.40,BUS=3.780,V5=...,V3V3=...,...
       // Flightware variants may send V/TEMP/AX/... either one per line or
-      // together on the same line.  Parse every supported assignment and
-      // intentionally ignore unrelated Lab5-03 EPS fields such as V5/ISOL.
-      const fieldPattern = /(?:^|[,\s:])(VOLTAGE|VBAT|TEMP|BUS|NUM|AX|AY|AZ|GX|GY|GZ|MX|MY|MZ|V|T)\s*=\s*([-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)/gi;
+      // together on the same line. Parse every supported assignment.
+      const fieldPattern = /(?:^|[,\s:])(VOLTAGE|VBAT|TEMP|BUS|V3V3|ICHG|IBUS|ISOL|V5|SAP|NUM|AX|AY|AZ|GX|GY|GZ|MX|MY|MZ|V|T)\s*=\s*([-+]?\d+(?:\.\d+)?(?:[eE][-+]?\d+)?)/gi;
       let matched = false;
       let match;
 
@@ -3052,6 +3267,12 @@
 
       setTelemetryText(packetUi.tmVoltageValue, "-- V");
       setTelemetryText(packetUi.tmTempValue, "-- °C");
+      setTelemetryText(packetUi.tmV5Value, "-- V");
+      setTelemetryText(packetUi.tmV3v3Value, "-- V");
+      setTelemetryText(packetUi.tmSapValue, "-- V");
+      setTelemetryText(packetUi.tmIsolValue, "-- A");
+      setTelemetryText(packetUi.tmIbusValue, "-- A");
+      setTelemetryText(packetUi.tmIchgValue, "-- A");
       setTelemetryText(packetUi.tmAccXValue, "--");
       setTelemetryText(packetUi.tmAccYValue, "--");
       setTelemetryText(packetUi.tmAccZValue, "--");
@@ -3172,6 +3393,12 @@
     const TELEMETRY_GRAPH_ITEMS = {
       voltageV: { label: "電圧", unit: "V", defaultMin: 3.0, defaultMax: 4.3, fixed: 2 },
       temperatureC: { label: "温度", unit: "°C", defaultMin: 0, defaultMax: 40, fixed: 1 },
+      voltage5V: { label: "5V系電圧", unit: "V", defaultMin: 0, defaultMax: 6, fixed: 3 },
+      voltage3v3: { label: "3.3V系電圧", unit: "V", defaultMin: 0, defaultMax: 4, fixed: 3 },
+      solarArrayVoltageV: { label: "太陽電池電圧", unit: "V", defaultMin: 0, defaultMax: 6, fixed: 3 },
+      solarCurrentA: { label: "太陽電池電流", unit: "A", defaultMin: 0, defaultMax: 1, fixed: 3 },
+      busCurrentA: { label: "BUS電流", unit: "A", defaultMin: 0, defaultMax: 1, fixed: 3 },
+      chargeCurrentA: { label: "充電電流", unit: "A", defaultMin: 0, defaultMax: 1, fixed: 3 },
       accX: { label: "加速度 X", unit: "m/s²", defaultMin: -12, defaultMax: 12, fixed: 2 },
       accY: { label: "加速度 Y", unit: "m/s²", defaultMin: -12, defaultMax: 12, fixed: 2 },
       accZ: { label: "加速度 Z", unit: "m/s²", defaultMin: -12, defaultMax: 12, fixed: 2 },
@@ -3186,6 +3413,8 @@
     const TELEMETRY_GRAPH_DEFS = [
       { label: "温度", unit: "°C", keys: ["temperatureC"] },
       { label: "電圧", unit: "V", keys: ["voltageV"] },
+      { label: "電源電圧", unit: "V", keys: ["voltage5V", "voltage3v3", "solarArrayVoltageV"] },
+      { label: "電流", unit: "A", keys: ["solarCurrentA", "busCurrentA", "chargeCurrentA"] },
       { label: "加速度", unit: "m/s²", keys: ["accX", "accY", "accZ"] },
       { label: "角速度", unit: "deg / s", keys: ["gyroX", "gyroY", "gyroZ"] },
       { label: "地磁気", unit: "µT", keys: ["magX", "magY", "magZ"] }
@@ -3194,6 +3423,12 @@
     const TELEMETRY_GRAPH_COLORS = {
       voltageV: { line: "rgba(40, 217, 232, 0.96)", point: "#28d9e8", shadow: "rgba(40, 217, 232, 0.45)" },
       temperatureC: { line: "rgba(242, 164, 0, 0.96)", point: "#f2a400", shadow: "rgba(242, 164, 0, 0.45)" },
+      voltage5V: { line: "rgba(43, 224, 95, 0.94)", point: "#2be05f", shadow: "rgba(43, 224, 95, 0.40)" },
+      voltage3v3: { line: "rgba(85, 184, 255, 0.94)", point: "#55b8ff", shadow: "rgba(85, 184, 255, 0.38)" },
+      solarArrayVoltageV: { line: "rgba(255, 150, 96, 0.94)", point: "#ff9660", shadow: "rgba(255, 150, 96, 0.38)" },
+      solarCurrentA: { line: "rgba(91, 235, 255, 0.94)", point: "#5bebff", shadow: "rgba(91, 235, 255, 0.38)" },
+      busCurrentA: { line: "rgba(255, 204, 90, 0.94)", point: "#ffcc5a", shadow: "rgba(255, 204, 90, 0.36)" },
+      chargeCurrentA: { line: "rgba(180, 140, 255, 0.94)", point: "#b48cff", shadow: "rgba(180, 140, 255, 0.38)" },
       accX: { line: "rgba(43, 224, 95, 0.94)", point: "#2be05f", shadow: "rgba(43, 224, 95, 0.40)" },
       accY: { line: "rgba(85, 184, 255, 0.94)", point: "#55b8ff", shadow: "rgba(85, 184, 255, 0.38)" },
       accZ: { line: "rgba(255, 101, 101, 0.94)", point: "#ff6565", shadow: "rgba(255, 101, 101, 0.38)" },
@@ -3780,6 +4015,7 @@
       const command = normalizeCommandText(commandText);
       if (command === "a") return getCommandModeLabel("ON");
       if (command === "b") return getCommandModeLabel("OFF");
+      if (command === "p") return "IMG_BEGIN";
       return "";
     }
 
@@ -3846,12 +4082,15 @@
       let changed = false;
       const now = Date.now();
       commandLogHistory.forEach(row => {
+        const timeoutMs = String(row.expectedAck || "").toUpperCase() === "IMG_BEGIN"
+          ? 60000
+          : COMMAND_ACK_TIMEOUT_MS;
         if (
           row.type === "tx" &&
           !row.ackReceived &&
           !row.timedOut &&
           Number.isFinite(row.sentAtMs) &&
-          now - row.sentAtMs >= COMMAND_ACK_TIMEOUT_MS
+          now - row.sentAtMs >= timeoutMs
         ) {
           row.timedOut = true;
           changed = true;
@@ -3873,6 +4112,21 @@
       );
       if (!row) return false;
 
+      row.ackReceived = true;
+      row.ackReceivedAtMs = Date.now();
+      renderCommandLog();
+      return true;
+    }
+
+    function markMatchingExpectedAck(expectedAck) {
+      const expected = String(expectedAck || "").toUpperCase();
+      const row = commandLogHistory.find(item =>
+        item.type === "tx"
+        && !item.ackReceived
+        && !item.timedOut
+        && String(item.expectedAck || "").toUpperCase() === expected
+      );
+      if (!row) return false;
       row.ackReceived = true;
       row.ackReceivedAtMs = Date.now();
       renderCommandLog();
@@ -4068,7 +4322,7 @@
       }
 
       if (!isAllowedCommand(commandText)) {
-        alert("送信できるコマンドは a または b です。");
+        alert("送信できるコマンドは a、b、p です。");
         return;
       }
 
@@ -4198,7 +4452,6 @@
       if (!xbeePort || !xbeePort.readable || xbeeReadLoopActive) return;
 
       xbeeReadLoopActive = true;
-      const decoder = new TextDecoder();
       xbeeReader = xbeePort.readable.getReader();
 
       try {
@@ -4206,8 +4459,10 @@
           const { value, done } = await xbeeReader.read();
           if (done) break;
           if (value) {
-            handleReceivedSerialBytes(value);
-            handleReceivedSerialText(decoder.decode(value, { stream: true }));
+            // Demultiplex Lab5-05 image packets before feeding the existing
+            // binary/text telemetry parsers. This keeps reception asynchronous
+            // and prevents JPEG bytes from being mistaken for telemetry.
+            imageStreamReceiver.push(value);
           }
         }
       } catch (error) {
@@ -4437,6 +4692,7 @@
     async function disconnectXbeePort() {
       xbeeReadLoopActive = false;
       stopSimulatedRssi();
+      imageStreamReceiver.reset();
 
       try {
         if (xbeeReader) {
