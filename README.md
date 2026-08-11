@@ -133,6 +133,20 @@ Library's 64-byte DATA payload and 16-bit packet-count fields. Packet timeout is
 event-driven, so the page UI remains responsive during reception. The GitHub
 Pages workflow also initializes submodules before publishing.
 
+## Dashboard display controls
+
+The **表示機能** control in the dashboard header opens a checklist for the
+orbit, tracking, telemetry, image, packet-log, and command panels. Hiding a
+panel only changes the layout; it does not stop serial reception or telemetry
+history collection. The selected panel set is saved in browser local storage.
+
+The **表示グラフ** control beside **テレメトリ推移** independently enables
+temperature, voltage, EPS voltage, current, acceleration, angular-rate, and
+magnetic-field graphs. At least one graph remains selected, and the selection
+is also restored after a reload. This keeps the default dashboard readable
+while still allowing every received telemetry series to be inspected when
+needed.
+
 ## Verification
 
 Run the mock protocol test with Node.js:

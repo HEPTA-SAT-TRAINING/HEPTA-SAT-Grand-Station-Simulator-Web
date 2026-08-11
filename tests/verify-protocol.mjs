@@ -167,6 +167,16 @@ function extractFunction(source, name) {
 
 const html = fs.readFileSync(new URL("../public/ground-station.html", import.meta.url), "utf8");
 
+// The dashboard exposes non-destructive panel and graph selectors so dense
+// layouts can be reduced without affecting the serial receiver.
+assert.match(html, /id="panel-selector-trigger"/);
+assert.match(html, /data-panel-toggle=/);
+assert.match(html, /hepta-gs-visible-panels-v1/);
+assert.match(html, /id="graph-selector-trigger"/);
+assert.match(html, /data-graph-toggle=/);
+assert.match(html, /hepta-gs-visible-graphs-v1/);
+assert.match(html, /DEFAULT_VISIBLE_GRAPHS\s*=\s*new Set/);
+
 // The command UI must accept the three single-byte Lab commands, including p.
 const commandIdsSource = html.match(/commandIds:\s*{([\s\S]*?)}/)?.[1] || "";
 const commandIds = Object.fromEntries(

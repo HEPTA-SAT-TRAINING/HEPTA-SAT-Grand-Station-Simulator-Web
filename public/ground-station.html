@@ -100,14 +100,111 @@
     }
 
     .simulation-time-value {
-      grid-column: 3;
-      justify-self: end;
       color: #ffffff;
       font-family: Consolas, Menlo, monospace;
       font-size: 14px;
       font-weight: 700;
       letter-spacing: 0;
       white-space: nowrap;
+    }
+
+    .header-actions {
+      grid-column: 3;
+      justify-self: end;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      position: relative;
+    }
+
+    .panel-selector-trigger,
+    .graph-selector-trigger {
+      border: 1px solid #7da5ce;
+      border-radius: 999px;
+      background: #ffffff;
+      color: #0c2b66;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 5px 10px;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .panel-selector-trigger:hover,
+    .panel-selector-trigger:focus-visible,
+    .graph-selector-trigger:hover,
+    .graph-selector-trigger:focus-visible {
+      border-color: #005bd8;
+      outline: none;
+      box-shadow: 0 0 0 2px rgba(0, 91, 216, 0.16);
+    }
+
+    .panel-selector-menu,
+    .graph-selector-menu {
+      position: absolute;
+      z-index: 20;
+      min-width: 220px;
+      padding: 8px;
+      border: 1px solid #b8c6d8;
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.98);
+      box-shadow: 0 10px 28px rgba(26, 54, 89, 0.22);
+      color: #16365d;
+    }
+
+    .panel-selector-menu {
+      top: calc(100% + 7px);
+      right: 0;
+    }
+
+    .graph-selector-menu {
+      top: calc(100% + 4px);
+      right: 0;
+      min-width: 190px;
+    }
+
+    .selector-menu-heading {
+      padding: 3px 5px 7px;
+      color: #536b86;
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+    }
+
+    .selector-check-option {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      padding: 6px 5px;
+      border-radius: 5px;
+      font-size: 11px;
+      cursor: pointer;
+    }
+
+    .selector-check-option:hover {
+      background: #eef5fc;
+    }
+
+    .selector-check-option input {
+      width: 15px;
+      height: 15px;
+      margin: 0;
+      accent-color: #0568d8;
+      cursor: pointer;
+    }
+
+    .panel-title-with-actions {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+      overflow: visible;
+    }
+
+    .panel-title-with-actions > span:first-child {
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .main {
@@ -126,9 +223,23 @@
 
     .bottom-area {
       display: grid;
-      grid-template-columns: minmax(0, 13fr) minmax(0, 16fr) minmax(0, 16fr) minmax(0, 34fr) minmax(0, 21fr);
+      grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 8px;
       min-height: 0;
+    }
+
+    .panel[data-panel-id][hidden] {
+      display: none !important;
+    }
+
+    .top-area > [data-panel-id],
+    .bottom-area > [data-panel-id] {
+      min-width: 0;
+    }
+
+    .top-area,
+    .bottom-area {
+      align-items: stretch;
     }
 
     .panel {
@@ -2116,7 +2227,14 @@
 
     <header class="header">
       <span class="header-title">HEPTA Ground Station Simulator</span>
-      <span class="simulation-time-value" id="simulation-time-value">--:--:--</span>
+      <div class="header-actions">
+        <button type="button" class="panel-selector-trigger" id="panel-selector-trigger" aria-expanded="false" aria-controls="panel-selector-menu">表示機能</button>
+        <div class="panel-selector-menu" id="panel-selector-menu" hidden>
+          <div class="selector-menu-heading">表示するパネル</div>
+          <div id="panel-selector-options"></div>
+        </div>
+        <span class="simulation-time-value" id="simulation-time-value">--:--:--</span>
+      </div>
     </header>
 
     <main class="main">
@@ -2128,7 +2246,7 @@
         <div class="top-left">
 
           <!-- 軌道計算 -->
-          <div class="panel">
+          <div class="panel" data-panel-id="orbit-selection">
             <div class="panel-title">軌道選択</div>
 
             <div class="panel-body tle-body">
@@ -2190,7 +2308,7 @@
         </div>
 
         <!-- 中央：地図 -->
-        <div class="panel orbit-panel">
+        <div class="panel orbit-panel" data-panel-id="orbit-map">
           <div class="panel-title">軌道マップ</div>
 
           <div class="orbit-map-placeholder" id="orbit-map-container">
@@ -2211,7 +2329,7 @@
 
         <!-- 右上 -->
         <div class="antenna-area">
-          <div class="panel">
+          <div class="panel" data-panel-id="tracking">
             <div class="panel-title">衛星・アンテナ追尾ビジュアル</div>
             <div class="panel-body tracking-body" id="antenna-visual-container">
               <canvas id="antenna-visual-canvas" class="tracking-canvas"></canvas>
@@ -2232,7 +2350,7 @@
             </div>
           </div>
 
-          <div class="panel">
+          <div class="panel" data-panel-id="azel">
             <div class="panel-title">方位角 / 仰角グラフ</div>
             <div class="panel-body tracking-body azel-split-body" id="azel-graph-panel">
               <div class="mini-graph-box">
@@ -2262,7 +2380,7 @@
       <!-- 下段 -->
       <section class="bottom-area">
 
-        <div class="panel">
+        <div class="panel" data-panel-id="rssi">
           <div class="panel-title">受信強度</div>
           <div class="panel-body link-status-body">
             <div class="link-status-card">
@@ -2281,7 +2399,7 @@
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" data-panel-id="packet-log">
           <div class="panel-title">受信データ</div>
           <div class="panel-body packet-body">
             <div class="packet-log">
@@ -2293,7 +2411,7 @@
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" data-panel-id="telemetry-values">
           <div class="panel-title">テレメトリ値</div>
           <div class="panel-body tm-value-body">
             <div class="tm-value-grid">
@@ -2380,14 +2498,21 @@
           </div>
         </div>
 
-        <div class="panel">
-          <div class="panel-title">テレメトリ推移</div>
+        <div class="panel" data-panel-id="telemetry-graphs">
+          <div class="panel-title panel-title-with-actions">
+            <span>テレメトリ推移</span>
+            <button type="button" class="graph-selector-trigger" id="graph-selector-trigger" aria-expanded="false" aria-controls="graph-selector-menu">表示グラフ</button>
+            <div class="graph-selector-menu" id="graph-selector-menu" hidden>
+              <div class="selector-menu-heading">表示するグラフ</div>
+              <div id="graph-selector-options"></div>
+            </div>
+          </div>
           <div class="panel-body telemetry-graph-body">
             <div class="telemetry-graph-grid" id="telemetry-graph-grid"></div>
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" data-panel-id="image">
           <div class="panel-title">写真受信</div>
           <div class="panel-body image-receive-body">
             <div class="image-receive-info">
@@ -2401,7 +2526,7 @@
           </div>
         </div>
 
-        <div class="panel">
+        <div class="panel" data-panel-id="command">
           <div class="panel-title">コマンドログ</div>
           <div class="panel-body command-body">
             <div class="command-input-area">
@@ -2661,6 +2786,135 @@
     };
 
     const telemetryGraphBody = document.querySelector(".telemetry-graph-body");
+    const panelSelectorTrigger = document.getElementById("panel-selector-trigger");
+    const panelSelectorMenu = document.getElementById("panel-selector-menu");
+    const panelSelectorOptions = document.getElementById("panel-selector-options");
+    const graphSelectorTrigger = document.getElementById("graph-selector-trigger");
+    const graphSelectorMenu = document.getElementById("graph-selector-menu");
+    const graphSelectorOptions = document.getElementById("graph-selector-options");
+    const topArea = document.querySelector(".top-area");
+    const bottomArea = document.querySelector(".bottom-area");
+    const topLeftArea = document.querySelector(".top-left");
+    const antennaArea = document.querySelector(".antenna-area");
+
+    const PANEL_DEFS = [
+      { id: "orbit-selection", label: "軌道選択" },
+      { id: "orbit-map", label: "軌道マップ" },
+      { id: "tracking", label: "衛星・アンテナ追尾" },
+      { id: "azel", label: "方位角 / 仰角グラフ" },
+      { id: "rssi", label: "受信強度" },
+      { id: "packet-log", label: "受信データ" },
+      { id: "telemetry-values", label: "テレメトリ値" },
+      { id: "telemetry-graphs", label: "テレメトリ推移" },
+      { id: "image", label: "写真受信" },
+      { id: "command", label: "コマンドログ" },
+    ];
+    const DEFAULT_VISIBLE_PANELS = new Set([
+      "orbit-selection", "orbit-map", "tracking", "azel", "rssi",
+      "telemetry-values", "telemetry-graphs", "command",
+    ]);
+    const PANEL_STORAGE_KEY = "hepta-gs-visible-panels-v1";
+
+    function readStoredSet(key, fallback) {
+      try {
+        const stored = JSON.parse(localStorage.getItem(key) || "null");
+        if (Array.isArray(stored)) return new Set(stored);
+      } catch (error) {
+        console.warn("表示設定を読み込めませんでした", error);
+      }
+      return new Set(fallback);
+    }
+
+    let visiblePanelIds = readStoredSet(PANEL_STORAGE_KEY, DEFAULT_VISIBLE_PANELS);
+
+    function saveSet(key, values) {
+      try {
+        localStorage.setItem(key, JSON.stringify([...values]));
+      } catch (error) {
+        console.warn("表示設定を保存できませんでした", error);
+      }
+    }
+
+    function setMenuVisibility(menu, trigger, visible) {
+      if (!menu || !trigger) return;
+      menu.hidden = !visible;
+      trigger.setAttribute("aria-expanded", String(visible));
+    }
+
+    function updatePanelLayout() {
+      const panelElements = new Map(
+        [...document.querySelectorAll("[data-panel-id]")]
+          .map(panel => [panel.dataset.panelId, panel]),
+      );
+      for (const def of PANEL_DEFS) {
+        const panel = panelElements.get(def.id);
+        if (panel) panel.hidden = !visiblePanelIds.has(def.id);
+      }
+
+      const hasOrbitSelection = visiblePanelIds.has("orbit-selection");
+      const hasTracking = visiblePanelIds.has("tracking") || visiblePanelIds.has("azel");
+      if (topLeftArea) topLeftArea.hidden = !hasOrbitSelection;
+      if (antennaArea) antennaArea.hidden = !hasTracking;
+
+      if (topArea) {
+        const topCount = [topLeftArea, topArea.querySelector("[data-panel-id=orbit-map]"), antennaArea]
+          .filter(element => element && !element.hidden).length;
+        topArea.style.gridTemplateColumns = topCount
+          ? `repeat(${topCount}, minmax(0, 1fr))`
+          : "1fr";
+      }
+      if (bottomArea) {
+        const bottomCount = [...bottomArea.querySelectorAll(":scope > [data-panel-id]")]
+          .filter(panel => !panel.hidden).length;
+        bottomArea.style.gridTemplateColumns = bottomCount
+          ? `repeat(${bottomCount}, minmax(0, 1fr))`
+          : "1fr";
+      }
+    }
+
+    function renderPanelSelector() {
+      if (!panelSelectorOptions) return;
+      panelSelectorOptions.innerHTML = PANEL_DEFS.map(def => `
+        <label class="selector-check-option">
+          <input type="checkbox" data-panel-toggle="${def.id}" ${visiblePanelIds.has(def.id) ? "checked" : ""}>
+          <span>${def.label}</span>
+        </label>
+      `).join("");
+      panelSelectorOptions.querySelectorAll("[data-panel-toggle]").forEach(input => {
+        input.addEventListener("change", () => {
+          if (input.checked) visiblePanelIds.add(input.dataset.panelToggle);
+          else visiblePanelIds.delete(input.dataset.panelToggle);
+          saveSet(PANEL_STORAGE_KEY, visiblePanelIds);
+          updatePanelLayout();
+          drawTelemetryGraphs();
+        });
+      });
+    }
+
+    panelSelectorTrigger?.addEventListener("click", () => {
+      const open = panelSelectorMenu?.hidden === true;
+      setMenuVisibility(panelSelectorMenu, panelSelectorTrigger, open);
+      setMenuVisibility(graphSelectorMenu, graphSelectorTrigger, false);
+    });
+
+    graphSelectorTrigger?.addEventListener("click", () => {
+      const open = graphSelectorMenu?.hidden === true;
+      setMenuVisibility(graphSelectorMenu, graphSelectorTrigger, open);
+      setMenuVisibility(panelSelectorMenu, panelSelectorTrigger, false);
+    });
+
+    document.addEventListener("pointerdown", event => {
+      if (panelSelectorMenu && panelSelectorTrigger
+          && !panelSelectorMenu.contains(event.target)
+          && !panelSelectorTrigger.contains(event.target)) {
+        setMenuVisibility(panelSelectorMenu, panelSelectorTrigger, false);
+      }
+      if (graphSelectorMenu && graphSelectorTrigger
+          && !graphSelectorMenu.contains(event.target)
+          && !graphSelectorTrigger.contains(event.target)) {
+        setMenuVisibility(graphSelectorMenu, graphSelectorTrigger, false);
+      }
+    });
 
     let xbeeReader = null;
     let xbeeReadLoopActive = false;
@@ -3432,14 +3686,41 @@
     };
 
     const TELEMETRY_GRAPH_DEFS = [
-      { label: "温度", unit: "°C", keys: ["temperatureC"] },
-      { label: "電圧", unit: "V", keys: ["voltageV"] },
-      { label: "電源電圧", unit: "V", keys: ["voltage5V", "voltage3v3", "solarArrayVoltageV"] },
-      { label: "電流", unit: "A", keys: ["solarCurrentA", "busCurrentA", "chargeCurrentA"] },
-      { label: "加速度", unit: "m/s²", keys: ["accX", "accY", "accZ"] },
-      { label: "角速度", unit: "deg / s", keys: ["gyroX", "gyroY", "gyroZ"] },
-      { label: "地磁気", unit: "µT", keys: ["magX", "magY", "magZ"] }
+      { id: "temperature", label: "温度", unit: "°C", keys: ["temperatureC"] },
+      { id: "voltage", label: "電圧", unit: "V", keys: ["voltageV"] },
+      { id: "power-voltage", label: "電源電圧", unit: "V", keys: ["voltage5V", "voltage3v3", "solarArrayVoltageV"] },
+      { id: "current", label: "電流", unit: "A", keys: ["solarCurrentA", "busCurrentA", "chargeCurrentA"] },
+      { id: "acceleration", label: "加速度", unit: "m/s²", keys: ["accX", "accY", "accZ"] },
+      { id: "gyro", label: "角速度", unit: "deg / s", keys: ["gyroX", "gyroY", "gyroZ"] },
+      { id: "magnetic", label: "地磁気", unit: "µT", keys: ["magX", "magY", "magZ"] }
     ];
+
+    const GRAPH_STORAGE_KEY = "hepta-gs-visible-graphs-v1";
+    const DEFAULT_VISIBLE_GRAPHS = new Set(["temperature", "voltage", "power-voltage"]);
+    let visibleGraphIds = readStoredSet(GRAPH_STORAGE_KEY, DEFAULT_VISIBLE_GRAPHS);
+
+    function renderGraphSelector() {
+      if (!graphSelectorOptions) return;
+      graphSelectorOptions.innerHTML = TELEMETRY_GRAPH_DEFS.map(def => `
+        <label class="selector-check-option">
+          <input type="checkbox" data-graph-toggle="${def.id}" ${visibleGraphIds.has(def.id) ? "checked" : ""}>
+          <span>${def.label} (${def.unit})</span>
+        </label>
+      `).join("");
+      graphSelectorOptions.querySelectorAll("[data-graph-toggle]").forEach(input => {
+        input.addEventListener("change", () => {
+          if (!input.checked && visibleGraphIds.size <= 1) {
+            input.checked = true;
+            return;
+          }
+          if (input.checked) visibleGraphIds.add(input.dataset.graphToggle);
+          else visibleGraphIds.delete(input.dataset.graphToggle);
+          saveSet(GRAPH_STORAGE_KEY, visibleGraphIds);
+          renderTelemetryGraphGrid();
+          drawTelemetryGraphs();
+        });
+      });
+    }
 
     const TELEMETRY_GRAPH_COLORS = {
       voltageV: { line: "rgba(40, 217, 232, 0.96)", point: "#28d9e8", shadow: "rgba(40, 217, 232, 0.45)" },
@@ -3471,6 +3752,7 @@
       const grid = telemetryGraphBody.querySelector("#telemetry-graph-grid");
       if (!grid) return;
 
+      renderGraphSelector();
       renderTelemetryGraphGrid();
     }
 
@@ -3481,9 +3763,9 @@
       if (!grid) return;
 
       grid.className = "telemetry-graph-grid";
-      grid.innerHTML = TELEMETRY_GRAPH_DEFS.map(def => {
+      grid.innerHTML = TELEMETRY_GRAPH_DEFS.filter(def => visibleGraphIds.has(def.id)).map(def => {
         return `
-          <div class="telemetry-graph-box" data-keys="${def.keys.join(",")}">
+          <div class="telemetry-graph-box" data-graph-id="${def.id}" data-keys="${def.keys.join(",")}">
             <div class="telemetry-graph-title"><span>${def.label}</span><span>${def.unit}</span></div>
             <div class="telemetry-graph-canvas-wrap">
               <canvas class="telemetry-graph-canvas"></canvas>
@@ -4536,6 +4818,8 @@
     setInterval(drawTelemetryGraphs, 1000);
     setInterval(updateCommandAckTimeouts, 1000);
     updateRssiDisplay(null);
+    renderPanelSelector();
+    updatePanelLayout();
     initTelemetryGraphSelects();
     drawTelemetryGraphs();
     updateRxCommandCountDisplay();
