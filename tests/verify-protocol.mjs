@@ -194,6 +194,8 @@ assert.match(html, /function graphEdgeLabel/);
 assert.match(html, /grid-template-columns: minmax\(0, 1fr\) !important/);
 assert.match(html, /grid-template-columns: repeat\(auto-fit, minmax\(220px, 1fr\)\)/);
 assert.match(html, /new ResizeObserver/);
+assert.match(html, /\.app\s*\{[\s\S]*width: 100%/);
+assert.match(html, /\.top-area > \*,[\s\S]*\.bottom-area > \*\s*\{[\s\S]*min-width: 0/);
 
 // The command UI must accept the three single-byte Lab commands, including p.
 const commandIdsSource = html.match(/commandIds:\s*{([\s\S]*?)}/)?.[1] || "";

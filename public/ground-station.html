@@ -54,7 +54,7 @@
     }
 
     .app {
-      width: 100vw;
+      width: 100%;
       height: 100vh;
       padding: 8px;
       display: grid;
@@ -91,12 +91,18 @@
       font-size: 15px;
       font-weight: 600;
       letter-spacing: 0.04em;
+      min-width: 0;
+      overflow: visible;
     }
 
     .header-title {
       grid-column: 2;
       justify-self: center;
       white-space: nowrap;
+      min-width: 0;
+      max-width: 100%;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .simulation-time-value {
@@ -212,6 +218,7 @@
       grid-template-rows: 50% 50%;
       gap: 8px;
       min-height: 0;
+      min-width: 0;
     }
 
     .top-area {
@@ -219,6 +226,7 @@
       grid-template-columns: minmax(0, 26fr) minmax(0, 34fr) minmax(0, 40fr);
       gap: 8px;
       min-height: 0;
+      min-width: 0;
     }
 
     .bottom-area {
@@ -227,6 +235,12 @@
       gap: 8px;
       min-height: 0;
       position: relative;
+      min-width: 0;
+    }
+
+    .top-area > *,
+    .bottom-area > * {
+      min-width: 0;
     }
 
     .bottom-resizer {
@@ -278,6 +292,7 @@
       border-radius: 4px;
       min-width: 0;
       min-height: 0;
+      min-width: 0;
       overflow: hidden;
       display: flex;
       flex-direction: column;
