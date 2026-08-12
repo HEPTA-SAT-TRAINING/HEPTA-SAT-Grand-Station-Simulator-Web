@@ -1532,6 +1532,7 @@
       overflow: hidden;
       display: flex;
       flex-direction: column;
+      min-width: 0;
     }
 
     .command-log-header,
@@ -1577,6 +1578,7 @@
 
     .command-log-command {
       color: #28d9e8;
+      min-width: 0;
       overflow: visible;
       overflow-wrap: anywhere;
       word-break: break-word;
@@ -1595,6 +1597,7 @@
       font-size: 8.5px;
       line-height: 1.3;
       white-space: nowrap;
+      max-width: 100%;
     }
 
     .command-log-status.command-log-status-ack {
@@ -2971,6 +2974,18 @@
       });
     }
 
+    function normalizeBottomWidths(widths, count = widths.length) {
+      if (!bottomArea || count <= 0 || widths.length !== count) return widths;
+      const gapTotal = Math.max(0, count - 1) * 8;
+      const available = Math.max(count * 120, bottomArea.clientWidth - gapTotal);
+      const minWidth = 120;
+      const safe = widths.map(width => Math.max(minWidth, Number(width) || minWidth));
+      const total = safe.reduce((sum, width) => sum + width, 0);
+      if (total <= available) return safe;
+      const scale = (available - count * minWidth) / Math.max(1, total - count * minWidth);
+      return safe.map(width => minWidth + (width - minWidth) * Math.max(0, scale));
+    }
+
     function installBottomResizers() {
       if (!bottomArea) return;
       bottomArea.querySelectorAll(".bottom-resizer").forEach(handle => handle.remove());
@@ -2996,7 +3011,8 @@
             const widths = panels.map(item => item.getBoundingClientRect().width);
             widths[index] = nextLeft;
             widths[index + 1] = nextRight;
-            bottomArea.style.gridTemplateColumns = widths.map(width => `${Math.round(width)}px`).join(" ");
+            const normalized = normalizeBottomWidths(widths, panels.length);
+            bottomArea.style.gridTemplateColumns = normalized.map(width => `${Math.round(width)}px`).join(" ");
             positionBottomResizers();
             drawTelemetryGraphs();
             drawRssiGraph();
@@ -3005,7 +3021,8 @@
             handle.classList.remove("dragging");
             window.removeEventListener("pointermove", move);
             window.removeEventListener("pointerup", end);
-            const widths = panels.map(item => Math.round(item.getBoundingClientRect().width));
+            const widths = normalizeBottomWidths(panels.map(item => Math.round(item.getBoundingClientRect().width)), panels.length)
+              .map(Math.round);
             bottomPanelWidths = widths;
             saveSet(BOTTOM_WIDTHS_STORAGE_KEY, widths);
           };
@@ -3050,7 +3067,8 @@
         const bottomCount = [...bottomArea.querySelectorAll(":scope > [data-panel-id]")]
           .filter(panel => !panel.hidden).length;
         if (bottomCount && bottomPanelWidths.length === bottomCount) {
-          bottomArea.style.gridTemplateColumns = bottomPanelWidths.map(width => `${Math.max(150, width)}px`).join(" ");
+          bottomPanelWidths = normalizeBottomWidths(bottomPanelWidths, bottomCount).map(Math.round);
+          bottomArea.style.gridTemplateColumns = bottomPanelWidths.map(width => `${width}px`).join(" ");
         } else {
           bottomArea.style.gridTemplateColumns = bottomCount
             ? `repeat(${bottomCount}, minmax(0, 1fr))`
