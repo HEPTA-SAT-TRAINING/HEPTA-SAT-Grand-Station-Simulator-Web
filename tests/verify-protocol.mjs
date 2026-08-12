@@ -181,6 +181,9 @@ assert.match(html, /imageReceiveProgressBar\.value/);
 assert.match(html, /grid-template-columns: minmax\(0, 1fr\) minmax\(0, 1fr\)/);
 assert.match(html, /updateRawSerialHexDisplay\(bytesToHex\(lineBytes\)\)/);
 assert.match(html, /row\.timedOut = false;/);
+assert.match(html, /requestAnimationFrame\(\(\) => requestAnimationFrame\(\(\) => drawTrackingDisplays\(\)\)\)/);
+assert.match(html, /solarArrayVoltageV: "SAP"/);
+assert.match(html, /overscroll-behavior: contain/);
 
 // The command UI must accept the three single-byte Lab commands, including p.
 const commandIdsSource = html.match(/commandIds:\s*{([\s\S]*?)}/)?.[1] || "";

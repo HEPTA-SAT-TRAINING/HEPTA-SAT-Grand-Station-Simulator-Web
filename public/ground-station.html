@@ -1286,7 +1286,7 @@
     }
 
     .telemetry-graph-grid {
-      min-width: 520px;
+      min-width: 540px;
       min-height: max-content;
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -1324,6 +1324,16 @@
       font-size: 10px;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    .telemetry-graph-title span:first-child {
+      min-width: 0;
+      flex: 1 1 auto;
+    }
+
+    .telemetry-graph-title span:last-child {
+      flex: 0 0 auto;
+      margin-left: 8px;
     }
 
     .telemetry-graph-canvas-wrap {
@@ -2198,6 +2208,7 @@
 
     .mini-graph-canvas-wrap {
       min-height: 0;
+      min-width: 0;
     }
 
     .tracking-body {
@@ -2936,6 +2947,7 @@
           saveSet(PANEL_STORAGE_KEY, visiblePanelIds);
           updatePanelLayout();
           drawTelemetryGraphs();
+          requestAnimationFrame(() => requestAnimationFrame(() => drawTrackingDisplays()));
         });
       });
     }
@@ -3960,11 +3972,29 @@
         }
 
         if (graphKeys.length > 1) {
-          const axisLabel = (TELEMETRY_GRAPH_ITEMS[key]?.label || key).split(" ").pop();
-          const legendX = leftPad + keyIndex * 32;
+          const legendLabels = {
+            voltage5V: "5V",
+            voltage3v3: "3V3",
+            solarArrayVoltageV: "SAP",
+            solarCurrentA: "ISOL",
+            busCurrentA: "IBUS",
+            chargeCurrentA: "ICHG",
+            accX: "X",
+            accY: "Y",
+            accZ: "Z",
+            gyroX: "X",
+            gyroY: "Y",
+            gyroZ: "Z",
+            magX: "X",
+            magY: "Y",
+            magZ: "Z"
+          };
+          const axisLabel = legendLabels[key] || (TELEMETRY_GRAPH_ITEMS[key]?.label || key);
+          const priorLabels = graphKeys.slice(0, keyIndex).map(itemKey => legendLabels[itemKey] || itemKey);
           ctx.save();
-          ctx.fillStyle = colors.point;
           ctx.font = "9px Consolas, Menlo, monospace";
+          const legendX = leftPad + priorLabels.reduce((sum, label) => sum + ctx.measureText(label).width + 16, 0);
+          ctx.fillStyle = colors.point;
           ctx.textAlign = "left";
           ctx.fillText(axisLabel, legendX, 12);
           ctx.restore();
