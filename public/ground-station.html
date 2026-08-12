@@ -1605,8 +1605,8 @@
 
     .image-receive-body {
       display: grid;
-      grid-template-columns: minmax(0, 1fr);
-      grid-template-rows: auto minmax(240px, 1fr);
+      grid-template-columns: minmax(0, 1fr) !important;
+      grid-template-rows: auto minmax(240px, 1fr) !important;
       gap: 10px;
       min-height: 220px;
       min-width: 0;
@@ -1621,6 +1621,8 @@
       flex-direction: column;
       gap: 8px;
       min-width: 0;
+      grid-column: 1;
+      grid-row: 1;
     }
 
     .image-receive-status,
@@ -1662,6 +1664,8 @@
       border-radius: 5px;
       background: rgba(245, 248, 252, 0.9);
       overflow: auto;
+      grid-column: 1;
+      grid-row: 2;
     }
 
     .image-receive-preview img {
@@ -4120,9 +4124,9 @@
       ctx.fillStyle = CANVAS_THEME.textMuted;
       ctx.font = "8px Segoe UI, Noto Sans JP, sans-serif";
       ctx.textAlign = "left";
-      ctx.fillText(axisRange.passBounded ? formatJstTimeAxis(new Date(axisRange.startMs)) : "AOS", leftPad, height - 3);
+      ctx.fillText(graphEdgeLabel(axisRange, "start"), leftPad, height - 3);
       ctx.textAlign = "right";
-      ctx.fillText(axisRange.passBounded ? formatJstTimeAxis(new Date(axisRange.endMs)) : "LOS", leftPad + plotW, height - 3);
+      ctx.fillText(graphEdgeLabel(axisRange, "end"), leftPad + plotW, height - 3);
       ctx.restore();
     }
 
@@ -4157,13 +4161,39 @@
         };
       }
 
+      const historyTimes = telemetryHistory
+        .map(point => Number(point.time))
+        .filter(time => Number.isFinite(time))
+        .sort((a, b) => a - b);
+      if (historyTimes.length >= 2 && historyTimes[historyTimes.length - 1] > historyTimes[0]) {
+        const first = historyTimes[0];
+        const last = historyTimes[historyTimes.length - 1];
+        const span = last - first;
+        const padding = Math.max(30 * 1000, span * 0.08);
+        return {
+          startMs: first,
+          endMs: last + padding,
+          durationMs: Math.max(1, last - first + padding),
+          passBounded: false,
+          historyBounded: true
+        };
+      }
+
       const durationMs = Math.max(1, fallbackWindowMs);
       return {
         startMs: nowMs - durationMs,
         endMs: nowMs,
         durationMs,
-        passBounded: false
+        passBounded: false,
+        historyBounded: false
       };
+    }
+
+    function graphEdgeLabel(axisRange, edge) {
+      if (axisRange.passBounded || axisRange.historyBounded) {
+        return formatJstTimeAxis(new Date(edge === "start" ? axisRange.startMs : axisRange.endMs));
+      }
+      return edge === "start" ? "AOS" : "LOS";
     }
 
     function resizeRssiCanvas() {
@@ -4295,9 +4325,9 @@
       ctx.fillStyle = CANVAS_THEME.textMuted;
       ctx.font = "7px Segoe UI, Noto Sans JP, sans-serif";
       ctx.textAlign = "left";
-      ctx.fillText(axisRange.passBounded ? formatJstTimeAxis(new Date(axisRange.startMs)) : "AOS", leftPad, height - 3);
+      ctx.fillText(graphEdgeLabel(axisRange, "start"), leftPad, height - 3);
       ctx.textAlign = "right";
-      ctx.fillText(axisRange.passBounded ? formatJstTimeAxis(new Date(axisRange.endMs)) : "LOS", leftPad + plotW, height - 3);
+      ctx.fillText(graphEdgeLabel(axisRange, "end"), leftPad + plotW, height - 3);
       ctx.restore();
     }
 

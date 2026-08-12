@@ -189,6 +189,9 @@ assert.match(html, /bottomPanelWidths/);
 assert.match(html, /RSSIデータ待ち/);
 assert.match(html, /\.image-receive-body[\s\S]*grid-template-rows: auto minmax\(240px, 1fr\)/);
 assert.match(html, /\.image-receive-body[\s\S]*overscroll-behavior: contain/);
+assert.match(html, /historyBounded/);
+assert.match(html, /function graphEdgeLabel/);
+assert.match(html, /grid-template-columns: minmax\(0, 1fr\) !important/);
 
 // The command UI must accept the three single-byte Lab commands, including p.
 const commandIdsSource = html.match(/commandIds:\s*{([\s\S]*?)}/)?.[1] || "";
