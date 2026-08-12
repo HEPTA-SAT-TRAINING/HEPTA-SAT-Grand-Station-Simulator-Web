@@ -1315,11 +1315,12 @@
     }
 
     .telemetry-graph-grid {
-      min-width: 540px;
+      width: 100%;
+      min-width: 0;
       min-height: max-content;
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      grid-auto-rows: 180px;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      grid-auto-rows: minmax(160px, 180px);
       gap: 6px;
       padding-right: 2px;
     }
@@ -2982,6 +2983,8 @@
             widths[index + 1] = nextRight;
             bottomArea.style.gridTemplateColumns = widths.map(width => `${Math.round(width)}px`).join(" ");
             positionBottomResizers();
+            drawTelemetryGraphs();
+            drawRssiGraph();
           };
           const end = () => {
             handle.classList.remove("dragging");
@@ -5068,6 +5071,16 @@
     renderPanelSelector();
     updatePanelLayout();
     initTelemetryGraphSelects();
+    if (typeof ResizeObserver === "function") {
+      const graphResizeObserver = new ResizeObserver(() => {
+        drawTelemetryGraphs();
+        drawTrackingDisplays();
+        drawRssiGraph();
+      });
+      [telemetryGraphBody, document.getElementById("azel-graph-panel"), rssiGraphContainer]
+        .filter(Boolean)
+        .forEach(element => graphResizeObserver.observe(element));
+    }
     drawTelemetryGraphs();
     updateRxCommandCountDisplay();
     updateTelemetryReceiveGate();
