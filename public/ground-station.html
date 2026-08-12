@@ -226,6 +226,35 @@
       grid-template-columns: repeat(5, minmax(0, 1fr));
       gap: 8px;
       min-height: 0;
+      position: relative;
+    }
+
+    .bottom-resizer {
+      position: absolute;
+      top: 8px;
+      bottom: 8px;
+      width: 12px;
+      transform: translateX(-50%);
+      z-index: 8;
+      cursor: col-resize;
+      touch-action: none;
+    }
+
+    .bottom-resizer::after {
+      content: "";
+      position: absolute;
+      top: 35%;
+      bottom: 35%;
+      left: 5px;
+      width: 2px;
+      border-radius: 2px;
+      background: rgba(0, 91, 216, 0.28);
+    }
+
+    .bottom-resizer:hover::after,
+    .bottom-resizer.dragging::after {
+      background: #0568d8;
+      box-shadow: 0 0 0 2px rgba(5, 104, 216, 0.15);
     }
 
     .panel[data-panel-id][hidden] {
@@ -1293,6 +1322,12 @@
       grid-auto-rows: 180px;
       gap: 6px;
       padding-right: 2px;
+    }
+
+    .telemetry-graph-body::-webkit-scrollbar,
+    .azel-split-body::-webkit-scrollbar {
+      width: 10px;
+      height: 10px;
     }
 
     .telemetry-graph-box {
@@ -2879,6 +2914,8 @@
     }
 
     let visiblePanelIds = readStoredSet(PANEL_STORAGE_KEY, DEFAULT_VISIBLE_PANELS);
+    const BOTTOM_WIDTHS_STORAGE_KEY = "hepta-gs-bottom-widths-v1";
+    let bottomPanelWidths = [...readStoredSet(BOTTOM_WIDTHS_STORAGE_KEY, [])].map(Number).filter(Number.isFinite);
 
     function saveSet(key, values) {
       try {
@@ -2892,6 +2929,61 @@
       if (!menu || !trigger) return;
       menu.hidden = !visible;
       trigger.setAttribute("aria-expanded", String(visible));
+    }
+
+    function positionBottomResizers() {
+      if (!bottomArea) return;
+      const areaRect = bottomArea.getBoundingClientRect();
+      bottomArea.querySelectorAll(".bottom-resizer").forEach(handle => {
+        const panel = bottomArea.querySelector(`[data-panel-id="${handle.dataset.afterPanel}"]`);
+        if (!panel) return;
+        const rect = panel.getBoundingClientRect();
+        handle.style.left = `${rect.right - areaRect.left}px`;
+      });
+    }
+
+    function installBottomResizers() {
+      if (!bottomArea) return;
+      bottomArea.querySelectorAll(".bottom-resizer").forEach(handle => handle.remove());
+      const panels = [...bottomArea.querySelectorAll(":scope > [data-panel-id]")]
+        .filter(panel => !panel.hidden);
+      panels.slice(0, -1).forEach((panel, index) => {
+        const handle = document.createElement("div");
+        handle.className = "bottom-resizer";
+        handle.dataset.afterPanel = panel.dataset.panelId;
+        handle.title = "左右のパネル幅を調整";
+        handle.addEventListener("pointerdown", event => {
+          event.preventDefault();
+          handle.setPointerCapture?.(event.pointerId);
+          handle.classList.add("dragging");
+          const startX = event.clientX;
+          const left = panels[index].getBoundingClientRect().width;
+          const right = panels[index + 1].getBoundingClientRect().width;
+          const move = moveEvent => {
+            const delta = moveEvent.clientX - startX;
+            const min = 150;
+            const nextLeft = Math.max(min, left + delta);
+            const nextRight = Math.max(min, right - delta);
+            const widths = panels.map(item => item.getBoundingClientRect().width);
+            widths[index] = nextLeft;
+            widths[index + 1] = nextRight;
+            bottomArea.style.gridTemplateColumns = widths.map(width => `${Math.round(width)}px`).join(" ");
+            positionBottomResizers();
+          };
+          const end = () => {
+            handle.classList.remove("dragging");
+            window.removeEventListener("pointermove", move);
+            window.removeEventListener("pointerup", end);
+            const widths = panels.map(item => Math.round(item.getBoundingClientRect().width));
+            bottomPanelWidths = widths;
+            saveSet(BOTTOM_WIDTHS_STORAGE_KEY, widths);
+          };
+          window.addEventListener("pointermove", move);
+          window.addEventListener("pointerup", end, { once: true });
+        });
+        bottomArea.appendChild(handle);
+      });
+      positionBottomResizers();
     }
 
     function updatePanelLayout() {
@@ -2926,9 +3018,14 @@
       if (bottomArea) {
         const bottomCount = [...bottomArea.querySelectorAll(":scope > [data-panel-id]")]
           .filter(panel => !panel.hidden).length;
-        bottomArea.style.gridTemplateColumns = bottomCount
-          ? `repeat(${bottomCount}, minmax(0, 1fr))`
-          : "1fr";
+        if (bottomCount && bottomPanelWidths.length === bottomCount) {
+          bottomArea.style.gridTemplateColumns = bottomPanelWidths.map(width => `${Math.max(150, width)}px`).join(" ");
+        } else {
+          bottomArea.style.gridTemplateColumns = bottomCount
+            ? `repeat(${bottomCount}, minmax(0, 1fr))`
+            : "1fr";
+        }
+        installBottomResizers();
       }
     }
 
@@ -4181,7 +4278,7 @@
         ctx.fillStyle = CANVAS_THEME.textMuted;
         ctx.font = "9px Segoe UI, Noto Sans JP, sans-serif";
         ctx.textAlign = "center";
-        //ctx.fillText("RSSIデータ待ち", leftPad + plotW / 2, topPad + plotH / 2 + 3);
+        ctx.fillText("RSSIデータ待ち", leftPad + plotW / 2, topPad + plotH / 2 + 3);
         ctx.restore();
       }
 
@@ -7030,7 +7127,7 @@ ${tle.line2}`;
     function drawAzimuthCompassGraph(ctx, width, height, plot, series, lookNow) {
       const cx = plot.left + plot.width / 2;
       const cy = plot.top + plot.height / 2;
-      const radius = Math.max(1, Math.min(plot.width, plot.height) * 0.47);
+      const radius = Math.max(1, Math.min(plot.width, plot.height) * 0.43);
 
       ctx.save();
       ctx.fillStyle = CANVAS_THEME.plotBg;
@@ -7066,7 +7163,7 @@ ${tle.line2}`;
         ctx.font = "bold 13px Segoe UI, Noto Sans JP, sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(label, cx + dx * (radius * 0.86), cy + dy * (radius * 0.86));
+        ctx.fillText(label, cx + dx * (radius * 0.92), cy + dy * (radius * 0.92));
       });
 
       [0, 90, 180, 270].forEach(deg => {
@@ -7075,7 +7172,7 @@ ${tle.line2}`;
         ctx.font = "8px Segoe UI, Noto Sans JP, sans-serif";
         ctx.textAlign = "center";
         ctx.textBaseline = "middle";
-        ctx.fillText(`${deg}°`, cx + Math.cos(rad) * radius * 0.48, cy + Math.sin(rad) * radius * 0.48);
+        ctx.fillText(`${deg}°`, cx + Math.cos(rad) * radius * 0.58, cy + Math.sin(rad) * radius * 0.58);
       });
 
       if (series && Array.isArray(series.points) && series.points.length > 1) {
@@ -8036,6 +8133,7 @@ ${tle.line2}`;
     }
 
     window.addEventListener("resize", () => {
+      positionBottomResizers();
       resizeOrbitMapCanvas();
       drawTrackingDisplays();
       drawRssiGraph();
