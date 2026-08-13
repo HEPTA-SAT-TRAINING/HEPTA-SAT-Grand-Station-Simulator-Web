@@ -10,57 +10,15 @@
     />
     <link rel="icon" href="./public/favicon.svg" />
     <link rel="stylesheet" href="./styles.css" />
-    <script type="module" src="./app.js"></script>
   </head>
   <body>
     <main class="feature-workspace">
-      <div class="feature-selector">
-        <button
-          type="button"
-          class="feature-selector__trigger"
-          id="feature-selector-trigger"
-          aria-expanded="false"
-          aria-controls="feature-selector-menu"
-        >
-          <span class="feature-selector__trigger-icon" aria-hidden="true">☰</span>
-          Select Feature
-        </button>
-
-        <div
-          class="feature-selector__menu"
-          id="feature-selector-menu"
-          role="menu"
-          aria-label="Feature list"
-          hidden
-        >
-          <div class="feature-selector__heading">Feature List</div>
-          <div id="feature-selector-items"></div>
-          <div class="feature-selector__current" id="feature-selector-current"></div>
-        </div>
-      </div>
-
-      <section
-        class="feature-view feature-view--ground-station"
-        data-feature-view="ground-station"
-      >
-        <iframe
-          class="legacy-ui-frame"
-          src="./public/ground-station.html"
-          title="HEPTA Ground Station Simulator"
-          allow="serial"
-        ></iframe>
-      </section>
-
-      <section
-        class="feature-view feature-placeholder"
-        data-feature-view="new-function"
-        hidden
-        aria-hidden="true"
-      >
-        <div class="feature-placeholder__panel">
-          <p>This feature is not implemented yet</p>
-        </div>
-      </section>
+      <iframe
+        class="legacy-ui-frame"
+        src="./public/ground-station.html"
+        title="HEPTA-SAT Ground Station Simulator"
+        allow="serial"
+      ></iframe>
     </main>
   </body>
 </html>

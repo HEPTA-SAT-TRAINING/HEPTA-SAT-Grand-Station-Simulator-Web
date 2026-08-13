@@ -281,4 +281,4 @@ textDecoderContext.input = "TEMP=broken,UNKNOWN=12";
 assert.equal(vm.runInContext("updateTelemetryDisplayFromBackendText(input)", textDecoderContext), false);
 assert.equal(displayedTextTelemetry.temperatureC, 23.4);
 
-console.log("HEPTA telemetry/image protocol tests passed");
+console.log("HEPTA-SAT telemetry/image protocol tests passed");

@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HEPTA Ground Station</title>
+  <title>HEPTA-SAT Ground Station</title>
 
   <style>
     * {
@@ -2001,7 +2001,7 @@
       text-align: center;
     }
 
-    /* ===== HEPTA Operation Platform Theme ===== */
+    /* ===== HEPTA-SAT Operation Platform Theme ===== */
 
     body {
       background: #f3f5f7;
@@ -2342,7 +2342,7 @@
   <div class="app">
 
     <header class="header">
-      <span class="header-title">HEPTA Ground Station Simulator</span>
+      <span class="header-title">HEPTA-SAT Ground Station Simulator</span>
       <div class="header-actions">
         <button type="button" class="panel-selector-trigger" id="panel-selector-trigger" aria-expanded="false" aria-controls="panel-selector-menu">Display Features</button>
         <div class="panel-selector-menu" id="panel-selector-menu" hidden>
@@ -3750,7 +3750,7 @@
     }
 
     function isTelemetryDisplayAllowed() {
-      // Prefer actual serial data, as in the HEPTA Serial Monitor.
+      // Prefer actual serial data, as in the HEPTA-SAT Serial Monitor.
       // Use elevation for orbit display only; do not hide live received data.
       return isReceiverConnected();
     }
