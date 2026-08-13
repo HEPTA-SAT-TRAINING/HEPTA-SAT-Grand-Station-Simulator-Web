@@ -32,7 +32,7 @@ jobs:
       - name: Prepare static site
         run: |
           mkdir _site
-          cp index.html app.js features.js styles.css .nojekyll _site/
+          cp index.html styles.css .nojekyll _site/
           cp -R public _site/public
 
       - name: Upload static site

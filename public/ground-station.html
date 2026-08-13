@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ja">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>HEPTA Ground Station</title>
+  <title>HEPTA-SAT Ground Station</title>
 
   <style>
     * {
@@ -2001,7 +2001,7 @@
       text-align: center;
     }
 
-    /* ===== HEPTA Operation Platform Theme ===== */
+    /* ===== HEPTA-SAT Operation Platform Theme ===== */
 
     body {
       background: #f3f5f7;
@@ -2342,11 +2342,11 @@
   <div class="app">
 
     <header class="header">
-      <span class="header-title">HEPTA Ground Station Simulator</span>
+      <span class="header-title">HEPTA-SAT Ground Station Simulator</span>
       <div class="header-actions">
-        <button type="button" class="panel-selector-trigger" id="panel-selector-trigger" aria-expanded="false" aria-controls="panel-selector-menu">表示機能</button>
+        <button type="button" class="panel-selector-trigger" id="panel-selector-trigger" aria-expanded="false" aria-controls="panel-selector-menu">Display Features</button>
         <div class="panel-selector-menu" id="panel-selector-menu" hidden>
-          <div class="selector-menu-heading">表示するパネル</div>
+          <div class="selector-menu-heading">Panels to display</div>
           <div id="panel-selector-options"></div>
         </div>
         <span class="simulation-time-value" id="simulation-time-value">--:--:--</span>
@@ -2355,15 +2355,15 @@
 
     <main class="main">
 
-      <!-- 上段 -->
+      <!-- Top row -->
       <section class="top-area">
 
-        <!-- 左上 -->
+        <!-- Top left -->
         <div class="top-left">
 
-          <!-- 軌道計算 -->
+          <!-- Orbit calculation -->
           <div class="panel" data-panel-id="orbit-selection">
-            <div class="panel-title">軌道選択</div>
+            <div class="panel-title">Orbit Selection</div>
 
             <div class="panel-body tle-body">
 
@@ -2376,7 +2376,7 @@
                 <textarea id="tle-input" class="tle-textarea" spellcheck="false" wrap="off"></textarea>
 
                 <div class="tle-button-row">
-                  <button class="gs-button" id="apply-tle-button">軌道計算</button>
+                  <button class="gs-button" id="apply-tle-button">Calculate Orbit</button>
                 </div>
 
                 <div class="pass-list">
@@ -2385,7 +2385,7 @@
                       <tr>
                         <th>AOS(JST)</th>
                         <th>LOS(JST)</th>
-                        <th>最大仰角</th>
+                        <th>Max Elevation</th>
                       </tr>
                     </thead>
                     <tbody id="pass-list-body"></tbody>
@@ -2398,7 +2398,7 @@
                 <textarea id="sat1-tle-display" class="tle-textarea" spellcheck="false" wrap="off" readonly></textarea>
 
                 <div class="tle-button-row">
-                  <button class="gs-button" id="apply-sat1-tle-button">軌道計算</button>
+                  <button class="gs-button" id="apply-sat1-tle-button">Calculate Orbit</button>
                 </div>
 
                 <div class="pass-list">
@@ -2407,7 +2407,7 @@
                       <tr>
                         <th>AOS(JST)</th>
                         <th>LOS(JST)</th>
-                        <th>最大仰角</th>
+                        <th>Max Elevation</th>
                       </tr>
                     </thead>
                     <tbody id="sat1-pass-list-body"></tbody>
@@ -2423,14 +2423,14 @@
 
         </div>
 
-        <!-- 中央：地図 -->
+        <!-- Center: map -->
         <div class="panel orbit-panel" data-panel-id="orbit-map">
-          <div class="panel-title">軌道マップ</div>
+          <div class="panel-title">Orbit Map</div>
 
           <div class="orbit-map-placeholder" id="orbit-map-container">
             <canvas id="orbit-map-canvas" class="orbit-map-canvas"></canvas>
             <div class="orbit-map-controls">
-              <button class="orbit-map-mode-button" id="orbit-map-mode-button">衛星付近を拡大</button>
+              <button class="orbit-map-mode-button" id="orbit-map-mode-button">Zoom to Satellite</button>
             </div>
             <div class="orbit-map-overlay">
               <div class="orbit-map-chip">GS <span id="orbit-map-gs-label">--</span></div>
@@ -2443,10 +2443,10 @@
 
         </div>
 
-        <!-- 右上 -->
+        <!-- Top right -->
         <div class="antenna-area">
           <div class="panel" data-panel-id="tracking">
-            <div class="panel-title">衛星・アンテナ追尾ビジュアル</div>
+            <div class="panel-title">Satellite / Antenna Tracking</div>
             <div class="panel-body tracking-body" id="antenna-visual-container">
               <canvas id="antenna-visual-canvas" class="tracking-canvas"></canvas>
               <div class="antenna-dom-visual" id="antenna-dom-visual">
@@ -2467,23 +2467,23 @@
           </div>
 
           <div class="panel" data-panel-id="azel">
-            <div class="panel-title">方位角 / 仰角グラフ</div>
+            <div class="panel-title">Azimuth / Elevation Graph</div>
             <div class="panel-body tracking-body azel-split-body" id="azel-graph-panel">
               <div class="mini-graph-box">
-                <div class="mini-graph-title">方位角</div>
+                <div class="mini-graph-title">Azimuth</div>
                 <div class="mini-graph-canvas-wrap" id="az-graph-container">
                   <canvas id="az-graph-canvas" class="tracking-canvas"></canvas>
                   <div class="mini-graph-overlay">
-                    <div class="tracking-chip">現在方位角 <span id="graph-az-label">--</span></div>
+                    <div class="tracking-chip">Current Az <span id="graph-az-label">--</span></div>
                   </div>
                 </div>
               </div>
               <div class="mini-graph-box">
-                <div class="mini-graph-title">仰角</div>
+                <div class="mini-graph-title">Elevation</div>
                 <div class="mini-graph-canvas-wrap" id="el-graph-container">
                   <canvas id="el-graph-canvas" class="tracking-canvas"></canvas>
                   <div class="mini-graph-overlay">
-                    <div class="tracking-chip">現在仰角 <span id="graph-el-label">--</span></div>
+                    <div class="tracking-chip">Current El <span id="graph-el-label">--</span></div>
                   </div>
                 </div>
               </div>
@@ -2493,11 +2493,11 @@
 
       </section>
 
-      <!-- 下段 -->
+      <!-- Bottom row -->
       <section class="bottom-area">
 
         <div class="panel" data-panel-id="rssi">
-          <div class="panel-title">受信強度</div>
+          <div class="panel-title">Received Signal Strength</div>
           <div class="panel-body link-status-body">
             <div class="link-status-card">
               <div class="link-status-label">RSSI</div>
@@ -2516,59 +2516,59 @@
         </div>
 
         <div class="panel" data-panel-id="packet-log">
-          <div class="panel-title">受信データ</div>
+          <div class="panel-title">Received Data</div>
           <div class="panel-body packet-body">
             <div class="packet-log">
-              <div class="packet-log-header">受信HEXログ（1パケット1行）</div>
+              <div class="packet-log-header">Received HEX log (one packet per line)</div>
               <div class="packet-log-list" id="packet-log-list">
-                <div class="packet-wait">パケット受信待ち</div>
+                <div class="packet-wait">Waiting for packet</div>
               </div>
             </div>
           </div>
         </div>
 
         <div class="panel" data-panel-id="telemetry-values">
-          <div class="panel-title">テレメトリ値</div>
+          <div class="panel-title">Telemetry Values</div>
           <div class="panel-body tm-value-body">
             <div class="tm-value-grid">
               <div class="tm-status-card">
-                <div class="tm-status-label">モード</div>
+                <div class="tm-status-label">Mode</div>
                 <div class="tm-status-main" id="tm-mode-value">--</div>
               </div>
 
               <div class="tm-value-card">
-                <div class="tm-value-label">電圧</div>
+                <div class="tm-value-label">Voltage</div>
                 <div class="tm-value-main" id="tm-voltage-value">-- V</div>
                 <div class="tm-value-sub" id="tm-voltage-raw">raw: -- --</div>
               </div>
               <div class="tm-value-card">
-                <div class="tm-value-label">温度</div>
+                <div class="tm-value-label">Temperature</div>
                 <div class="tm-value-main" id="tm-temp-value">-- °C</div>
                 <div class="tm-value-sub" id="tm-temp-raw">raw: -- --</div>
               </div>
 
               <div class="tm-value-card">
-                <div class="tm-value-label">5V系電圧</div>
+                <div class="tm-value-label">5V Rail</div>
                 <div class="tm-value-main" id="tm-v5-value">-- V</div>
               </div>
               <div class="tm-value-card">
-                <div class="tm-value-label">3.3V系電圧</div>
+                <div class="tm-value-label">3.3V Rail</div>
                 <div class="tm-value-main" id="tm-v3v3-value">-- V</div>
               </div>
               <div class="tm-value-card">
-                <div class="tm-value-label">太陽電池電圧</div>
+                <div class="tm-value-label">Solar Array Voltage</div>
                 <div class="tm-value-main" id="tm-sap-value">-- V</div>
               </div>
               <div class="tm-value-card">
-                <div class="tm-value-label">太陽電池電流</div>
+                <div class="tm-value-label">Solar Array Current</div>
                 <div class="tm-value-main" id="tm-isol-value">-- A</div>
               </div>
               <div class="tm-value-card">
-                <div class="tm-value-label">BUS電流</div>
+                <div class="tm-value-label">BUS Current</div>
                 <div class="tm-value-main" id="tm-ibus-value">-- A</div>
               </div>
               <div class="tm-value-card">
-                <div class="tm-value-label">充電電流</div>
+                <div class="tm-value-label">Charge Current</div>
                 <div class="tm-value-main" id="tm-ichg-value">-- A</div>
               </div>
 
@@ -2616,10 +2616,10 @@
 
         <div class="panel" data-panel-id="telemetry-graphs">
           <div class="panel-title panel-title-with-actions">
-            <span>テレメトリ推移</span>
-            <button type="button" class="graph-selector-trigger" id="graph-selector-trigger" aria-expanded="false" aria-controls="graph-selector-menu">表示グラフ</button>
+            <span>Telemetry History</span>
+            <button type="button" class="graph-selector-trigger" id="graph-selector-trigger" aria-expanded="false" aria-controls="graph-selector-menu">Display Graphs</button>
             <div class="graph-selector-menu" id="graph-selector-menu" hidden>
-              <div class="selector-menu-heading">表示するグラフ</div>
+              <div class="selector-menu-heading">Graphs to display</div>
               <div id="graph-selector-options"></div>
             </div>
           </div>
@@ -2629,34 +2629,34 @@
         </div>
 
         <div class="panel" data-panel-id="image">
-          <div class="panel-title">写真受信</div>
+          <div class="panel-title">Photo Reception</div>
           <div class="panel-body image-receive-body">
             <div class="image-receive-info">
-              <div class="image-receive-status" id="image-receive-status">pコマンドで写真を取得できます</div>
+              <div class="image-receive-status" id="image-receive-status">Use the p command to capture a photo</div>
               <div class="image-receive-progress" id="image-receive-progress">
-                <span id="image-receive-progress-text">待機中</span>
+                <span id="image-receive-progress-text">Waiting</span>
                 <progress class="image-receive-progress-bar" id="image-receive-progress-bar" max="1" value="0" hidden></progress>
               </div>
-              <a class="gs-button image-download-link" id="image-download-link" download="hepta-picture.jpg" hidden>JPEGを保存</a>
+              <a class="gs-button image-download-link" id="image-download-link" download="hepta-picture.jpg" hidden>Save JPEG</a>
             </div>
             <div class="image-receive-preview">
-              <img id="image-receive-preview" alt="受信したHEPTA-SAT写真" hidden>
+              <img id="image-receive-preview" alt="Received HEPTA-SAT photo" hidden>
             </div>
           </div>
         </div>
 
         <div class="panel" data-panel-id="command">
-          <div class="panel-title">コマンドログ</div>
+          <div class="panel-title">Command Log</div>
           <div class="panel-body command-body">
             <div class="command-input-area">
-              <input id="command-input" class="command-input" type="text" placeholder="コマンド入力欄 例: a / b / p" autocomplete="off" maxlength="1">
-              <button class="gs-button command-send-button" id="command-send-button">送信</button>
+              <input id="command-input" class="command-input" type="text" placeholder="Enter command, e.g. a / b / p" autocomplete="off" maxlength="1">
+              <button class="gs-button command-send-button" id="command-send-button">Send</button>
             </div>
 
             <div class="command-log">
               <div class="command-log-header">
-                <div>時間</div>
-                <div>送信コマンド</div>
+                <div>Time</div>
+                <div>Sent Command</div>
               </div>
               <div class="command-log-list" id="command-log-list">
               </div>
@@ -2667,21 +2667,21 @@
       </section>
     </main>
 
-    <!-- 最下部 -->
+    <!-- Footer -->
     <footer class="footer">
       <div class="footer-item footer-port-control" id="footer-port">
-        ポート：<span class="port-name" id="selected-port-name">未接続</span>
+        Port: <span class="port-name" id="selected-port-name">Disconnected</span>
         <span id="port-status-dot" class="status-dot disconnected"></span>
-        <span id="port-status-text">未接続</span>
-        <button class="gs-button" id="select-port-button">ポート選択</button>
-        <button class="gs-button" id="connect-port-button">接続</button>
-        <button class="gs-button danger" id="disconnect-port-button" disabled>切断</button>
+        <span id="port-status-text">Disconnected</span>
+        <button class="gs-button" id="select-port-button">Select Port</button>
+        <button class="gs-button" id="connect-port-button">Connect</button>
+        <button class="gs-button danger" id="disconnect-port-button" disabled>Disconnect</button>
       </div>
     </footer>
 
     <div class="pass-select-dialog-backdrop" id="pass-select-dialog-backdrop" role="dialog" aria-modal="true" aria-labelledby="pass-select-dialog-title">
       <div class="pass-select-dialog">
-        <div class="pass-select-dialog-title" id="pass-select-dialog-title">パスを選択</div>
+        <div class="pass-select-dialog-title" id="pass-select-dialog-title">Select Pass</div>
         <div class="pass-select-dialog-body">
           <div class="pass-select-dialog-row">
             <div class="pass-select-dialog-label">AOS(JST)</div>
@@ -2692,13 +2692,13 @@
             <div class="pass-select-dialog-value" id="pass-select-los">--</div>
           </div>
           <div class="pass-select-dialog-row">
-            <div class="pass-select-dialog-label">最大仰角</div>
+            <div class="pass-select-dialog-label">Max Elevation</div>
             <div class="pass-select-dialog-value" id="pass-select-max-el">--</div>
           </div>
         </div>
         <div class="pass-select-dialog-actions">
-          <button class="gs-button pass-select-cancel-button" id="pass-select-cancel-button" type="button">キャンセル</button>
-          <button class="gs-button" id="pass-select-confirm-button" type="button">選択する</button>
+          <button class="gs-button pass-select-cancel-button" id="pass-select-cancel-button" type="button">Cancel</button>
+          <button class="gs-button" id="pass-select-confirm-button" type="button">Select</button>
         </div>
       </div>
     </div>
@@ -2733,7 +2733,7 @@
     }
 
     if (window.location.protocol === "file:") {
-      showStartupWarning("このHTMLを直接開くと、衛星・アンテナの3D表示が簡易表示になることがあります。Windowsでは start.bat、macOSでは start.command をダブルクリックして、http://localhost から開いてください。");
+      showStartupWarning("Opening this HTML file directly can fall back to a simplified 3D view of the satellite and antenna. On Windows double-click start.bat, on macOS double-click start.command, then open http://localhost.");
     }
 
     const INTERNAL_GROUND_STATION = {
@@ -2747,14 +2747,14 @@
       return INTERNAL_GROUND_STATION;
     }
 
-    // AOS/LOS表示に使う最低仰角。
-    // パスはEl 5deg以上で見えるものを採用し、AOS/LOS時刻はEl 5deg交差で表示する。
+    // Minimum elevation used for AOS/LOS display.
+    // Use passes visible above El 5 deg, and show AOS/LOS at the El 5 deg crossings.
     const AOS_LOS_ELEVATION_THRESHOLD_DEG = 5;
     const PASS_MIN_MAX_ELEVATION_DEG = AOS_LOS_ELEVATION_THRESHOLD_DEG;
     const TRACKING_DISPLAY_MIN_ELEVATION_DEG = 0;
 
-    // 実機のWeb Serial受信は軌道計算と独立させる。
-    // ベンチ試験中も、ポートへ到着したデータは常に表示する。
+    // Keep live Web Serial reception independent of orbit calculation.
+    // Always show data that arrives on the port, including during bench tests.
 
     /* =========================
        XBee Serial Port
@@ -2796,7 +2796,7 @@
     const selectPortButton = document.getElementById("select-port-button");
     const connectPortButton = document.getElementById("connect-port-button");
     const disconnectPortButton = document.getElementById("disconnect-port-button");
-    // 切断・テスト送信ボタンはUIから削除
+    // Disconnect and test-send buttons were removed from the UI
 
     const rssiValueEl = document.getElementById("rssi-value");
     const rssiGraphCanvas = document.getElementById("rssi-graph-canvas");
@@ -2865,8 +2865,8 @@
     };
 
     const TELEMETRY_PACKET = {
-      // 全体形式：7E | Sat ID | Type | Seq(2B) | Len | Payload | Checksum
-      // HK Payload：
+      // Packet format: 7E | Sat ID | Type | Seq(2B) | Len | Payload | Checksum
+      // HK Payload:
       //   Mode(1B) | Voltage ADC count(2B) | Temperature[0.1 degC](2B)
       //   Acc XYZ[512 count/g](int16 x3)
       //   Gyro XYZ[2048/125 count/(deg/s)](int16 x3)
@@ -2918,16 +2918,16 @@
     const antennaArea = document.querySelector(".antenna-area");
 
     const PANEL_DEFS = [
-      { id: "orbit-selection", label: "軌道選択" },
-      { id: "orbit-map", label: "軌道マップ" },
-      { id: "tracking", label: "衛星・アンテナ追尾" },
-      { id: "azel", label: "方位角 / 仰角グラフ" },
-      { id: "rssi", label: "受信強度" },
-      { id: "packet-log", label: "受信データ" },
-      { id: "telemetry-values", label: "テレメトリ値" },
-      { id: "telemetry-graphs", label: "テレメトリ推移" },
-      { id: "image", label: "写真受信" },
-      { id: "command", label: "コマンドログ" },
+      { id: "orbit-selection", label: "Orbit Selection" },
+      { id: "orbit-map", label: "Orbit Map" },
+      { id: "tracking", label: "Satellite / Antenna Tracking" },
+      { id: "azel", label: "Azimuth / Elevation Graph" },
+      { id: "rssi", label: "Received Signal Strength" },
+      { id: "packet-log", label: "Received Data" },
+      { id: "telemetry-values", label: "Telemetry Values" },
+      { id: "telemetry-graphs", label: "Telemetry History" },
+      { id: "image", label: "Photo Reception" },
+      { id: "command", label: "Command Log" },
     ];
     const DEFAULT_VISIBLE_PANELS = new Set([
       "orbit-selection", "orbit-map", "tracking", "azel", "rssi",
@@ -2940,7 +2940,7 @@
         const stored = JSON.parse(localStorage.getItem(key) || "null");
         if (Array.isArray(stored)) return new Set(stored);
       } catch (error) {
-        console.warn("表示設定を読み込めませんでした", error);
+        console.warn("Could not load display settings", error);
       }
       return new Set(fallback);
     }
@@ -2953,7 +2953,7 @@
       try {
         localStorage.setItem(key, JSON.stringify([...values]));
       } catch (error) {
-        console.warn("表示設定を保存できませんでした", error);
+        console.warn("Could not save display settings", error);
       }
     }
 
@@ -2995,7 +2995,7 @@
         const handle = document.createElement("div");
         handle.className = "bottom-resizer";
         handle.dataset.afterPanel = panel.dataset.panelId;
-        handle.title = "左右のパネル幅を調整";
+        handle.title = "Adjust left/right panel widths";
         handle.addEventListener("pointerdown", event => {
           event.preventDefault();
           handle.setPointerCapture?.(event.pointerId);
@@ -3183,8 +3183,8 @@
         handleReceivedSerialText(telemetryTextDecoder.decode(bytes, { stream: true }));
       },
       onBegin() {
-        setImageStatus("写真データを受信しています");
-        if (imageReceiveProgressText) imageReceiveProgressText.textContent = "START待ち";
+        setImageStatus("Receiving photo data");
+        if (imageReceiveProgressText) imageReceiveProgressText.textContent = "Waiting for START";
         if (imageReceiveProgressBar) {
           imageReceiveProgressBar.hidden = false;
           imageReceiveProgressBar.removeAttribute("value");
@@ -3202,7 +3202,7 @@
         }
       },
       onWarning(message) {
-        setImageStatus(`受信警告: ${message}`, true);
+        setImageStatus(`Receive warning: ${message}`, true);
       },
       onComplete(result) {
         clearReceivedImageUrl();
@@ -3219,9 +3219,9 @@
         }
         const recovery = result.recoveredSequence === null
           ? ""
-          : ` / packet ${result.recoveredSequence}をparityで復元`;
-        setImageStatus(`受信完了: JPEG ${result.meta.imageSize} bytes / CRC OK${recovery}`);
-        if (imageReceiveProgressText) imageReceiveProgressText.textContent = "完了";
+          : ` / recovered packet ${result.recoveredSequence} with parity`;
+        setImageStatus(`Reception complete: JPEG ${result.meta.imageSize} bytes / CRC OK${recovery}`);
+        if (imageReceiveProgressText) imageReceiveProgressText.textContent = "Complete";
         if (imageReceiveProgressBar) {
           imageReceiveProgressBar.hidden = false;
           imageReceiveProgressBar.max = result.meta.imageSize;
@@ -3230,8 +3230,8 @@
       },
       onError(message) {
         markMatchingExpectedAck("IMG_BEGIN");
-        setImageStatus(`写真受信エラー: ${message}`, true);
-        if (imageReceiveProgressText) imageReceiveProgressText.textContent = "受信失敗";
+        setImageStatus(`Photo reception error: ${message}`, true);
+        if (imageReceiveProgressText) imageReceiveProgressText.textContent = "Reception failed";
         if (imageReceiveProgressBar) imageReceiveProgressBar.hidden = true;
       }
     };
@@ -3248,8 +3248,8 @@
         pendingImageReceiverBytes = 0;
       })
       .catch(error => {
-        console.error("画像受信moduleを読み込めませんでした", error);
-        setImageStatus("写真受信機能を読み込めませんでした", true);
+        console.error("Could not load the image reception module", error);
+        setImageStatus("Could not load photo reception", true);
         for (const bytes of pendingImageReceiverChunks) {
           handleReceivedSerialBytes(bytes);
           handleReceivedSerialText(telemetryTextDecoder.decode(bytes, { stream: true }));
@@ -3267,7 +3267,7 @@
     }
 
     function calculatePacketChecksum(bytesWithoutHeaderAndChecksum) {
-      // 教材用の簡易チェックサム：Sat ID〜Payloadまでの1 byte加算値の下位8 bit。
+      // Simple checksum for this course: lower 8 bits of the 1-byte sum from Sat ID through Payload.
       return bytesWithoutHeaderAndChecksum.reduce((sum, byte) => (sum + byte) & 0xFF, 0);
     }
 
@@ -3358,13 +3358,13 @@
     }
 
     function decodeHkPayload(payload, packetType = TELEMETRY_PACKET.typeHk) {
-      // HK Telemetry payload format（教材用）
-      // Payload[0]    : 運用モード 0x00=Standby, 0x01=Mission
-      // Payload[1-2]  : 電圧 ADC count, uint16, big-endian
-      // Payload[3-4]  : 温度 0.1 degC, int16, big-endian 例 23.2 degC = 232 = 0x00E8
-      // Payload[5-10] : 加速度XYZ 512 count/g, int16 x3
-      // Payload[11-16]: 角速度XYZ 2048/125 count/(deg/s), int16 x3
-      // Payload[17-22]: 地磁気XYZ uT integer, int16 x3
+      // HK Telemetry payload format (course)
+      // Payload[0]    : operations mode 0x00=Standby, 0x01=Mission
+      // Payload[1-2]  : voltage ADC count, uint16, big-endian
+      // Payload[3-4]  : temperature 0.1 degC, int16, big-endian e.g. 23.2 degC = 232 = 0x00E8
+      // Payload[5-10] : acceleration XYZ 512 count/g, int16 x3
+      // Payload[11-16]: angular rate XYZ 2048/125 count/(deg/s), int16 x3
+      // Payload[17-22]: magnetometer XYZ uT integer, int16 x3
       if (!payload || payload.length < TELEMETRY_PACKET.basicPayloadLength) return null;
 
       const packetTypeMode = decodePacketTypeMode(packetType);
@@ -3750,8 +3750,8 @@
     }
 
     function isTelemetryDisplayAllowed() {
-      // HEPTA Serial Monitorと同様、実際に届いたシリアルデータを優先する。
-      // 仰角は軌道表示にのみ使い、実機受信データの表示を抑止しない。
+      // Prefer actual serial data, as in the HEPTA-SAT Serial Monitor.
+      // Use elevation for orbit display only; do not hide live received data.
       return isReceiverConnected();
     }
 
@@ -3788,7 +3788,7 @@
       serialTextBuffer = "";
 
       if (packetUi.logList) {
-        packetUi.logList.innerHTML = '<div class="packet-wait">パケット受信待ち</div>';
+        packetUi.logList.innerHTML = '<div class="packet-wait">Waiting for packet</div>';
       }
 
       drawTelemetryGraphs();
@@ -3890,33 +3890,33 @@
     }
 
     const TELEMETRY_GRAPH_ITEMS = {
-      voltageV: { label: "電圧", unit: "V", defaultMin: 3.0, defaultMax: 4.3, fixed: 2 },
-      temperatureC: { label: "温度", unit: "°C", defaultMin: 0, defaultMax: 40, fixed: 1 },
-      voltage5V: { label: "5V系電圧", unit: "V", defaultMin: 0, defaultMax: 6, fixed: 3 },
-      voltage3v3: { label: "3.3V系電圧", unit: "V", defaultMin: 0, defaultMax: 4, fixed: 3 },
-      solarArrayVoltageV: { label: "太陽電池電圧", unit: "V", defaultMin: 0, defaultMax: 6, fixed: 3 },
-      solarCurrentA: { label: "太陽電池電流", unit: "A", defaultMin: 0, defaultMax: 1, fixed: 3 },
-      busCurrentA: { label: "BUS電流", unit: "A", defaultMin: 0, defaultMax: 1, fixed: 3 },
-      chargeCurrentA: { label: "充電電流", unit: "A", defaultMin: 0, defaultMax: 1, fixed: 3 },
-      accX: { label: "加速度 X", unit: "m/s²", defaultMin: -12, defaultMax: 12, fixed: 2 },
-      accY: { label: "加速度 Y", unit: "m/s²", defaultMin: -12, defaultMax: 12, fixed: 2 },
-      accZ: { label: "加速度 Z", unit: "m/s²", defaultMin: -12, defaultMax: 12, fixed: 2 },
-      gyroX: { label: "角速度 X", unit: "deg / s", defaultMin: -250, defaultMax: 250, fixed: 1 },
-      gyroY: { label: "角速度 Y", unit: "deg / s", defaultMin: -250, defaultMax: 250, fixed: 1 },
-      gyroZ: { label: "角速度 Z", unit: "deg / s", defaultMin: -250, defaultMax: 250, fixed: 1 },
-      magX: { label: "地磁気 X", unit: "µT", defaultMin: -80, defaultMax: 80, fixed: 1 },
-      magY: { label: "地磁気 Y", unit: "µT", defaultMin: -80, defaultMax: 80, fixed: 1 },
-      magZ: { label: "地磁気 Z", unit: "µT", defaultMin: -80, defaultMax: 80, fixed: 1 }
+      voltageV: { label: "Voltage", unit: "V", defaultMin: 3.0, defaultMax: 4.3, fixed: 2 },
+      temperatureC: { label: "Temperature", unit: "°C", defaultMin: 0, defaultMax: 40, fixed: 1 },
+      voltage5V: { label: "5V Rail", unit: "V", defaultMin: 0, defaultMax: 6, fixed: 3 },
+      voltage3v3: { label: "3.3V Rail", unit: "V", defaultMin: 0, defaultMax: 4, fixed: 3 },
+      solarArrayVoltageV: { label: "Solar Array Voltage", unit: "V", defaultMin: 0, defaultMax: 6, fixed: 3 },
+      solarCurrentA: { label: "Solar Array Current", unit: "A", defaultMin: 0, defaultMax: 1, fixed: 3 },
+      busCurrentA: { label: "BUS Current", unit: "A", defaultMin: 0, defaultMax: 1, fixed: 3 },
+      chargeCurrentA: { label: "Charge Current", unit: "A", defaultMin: 0, defaultMax: 1, fixed: 3 },
+      accX: { label: "Acceleration X", unit: "m/s²", defaultMin: -12, defaultMax: 12, fixed: 2 },
+      accY: { label: "Acceleration Y", unit: "m/s²", defaultMin: -12, defaultMax: 12, fixed: 2 },
+      accZ: { label: "Acceleration Z", unit: "m/s²", defaultMin: -12, defaultMax: 12, fixed: 2 },
+      gyroX: { label: "Angular Rate X", unit: "deg / s", defaultMin: -250, defaultMax: 250, fixed: 1 },
+      gyroY: { label: "Angular Rate Y", unit: "deg / s", defaultMin: -250, defaultMax: 250, fixed: 1 },
+      gyroZ: { label: "Angular Rate Z", unit: "deg / s", defaultMin: -250, defaultMax: 250, fixed: 1 },
+      magX: { label: "Magnetometer X", unit: "µT", defaultMin: -80, defaultMax: 80, fixed: 1 },
+      magY: { label: "Magnetometer Y", unit: "µT", defaultMin: -80, defaultMax: 80, fixed: 1 },
+      magZ: { label: "Magnetometer Z", unit: "µT", defaultMin: -80, defaultMax: 80, fixed: 1 }
     };
 
     const TELEMETRY_GRAPH_DEFS = [
-      { id: "temperature", label: "温度", unit: "°C", keys: ["temperatureC"] },
-      { id: "voltage", label: "電圧", unit: "V", keys: ["voltageV"] },
-      { id: "power-voltage", label: "電源電圧", unit: "V", keys: ["voltage5V", "voltage3v3", "solarArrayVoltageV"] },
-      { id: "current", label: "電流", unit: "A", keys: ["solarCurrentA", "busCurrentA", "chargeCurrentA"] },
-      { id: "acceleration", label: "加速度", unit: "m/s²", keys: ["accX", "accY", "accZ"] },
-      { id: "gyro", label: "角速度", unit: "deg / s", keys: ["gyroX", "gyroY", "gyroZ"] },
-      { id: "magnetic", label: "地磁気", unit: "µT", keys: ["magX", "magY", "magZ"] }
+      { id: "temperature", label: "Temperature", unit: "°C", keys: ["temperatureC"] },
+      { id: "voltage", label: "Voltage", unit: "V", keys: ["voltageV"] },
+      { id: "power-voltage", label: "Power Voltage", unit: "V", keys: ["voltage5V", "voltage3v3", "solarArrayVoltageV"] },
+      { id: "current", label: "Current", unit: "A", keys: ["solarCurrentA", "busCurrentA", "chargeCurrentA"] },
+      { id: "acceleration", label: "Acceleration", unit: "m/s²", keys: ["accX", "accY", "accZ"] },
+      { id: "gyro", label: "Angular Rate", unit: "deg / s", keys: ["gyroX", "gyroY", "gyroZ"] },
+      { id: "magnetic", label: "Magnetometer", unit: "µT", keys: ["magX", "magY", "magZ"] }
     ];
 
     const GRAPH_STORAGE_KEY = "hepta-gs-visible-graphs-v1";
@@ -4152,7 +4152,7 @@
         ctx.fillStyle = CANVAS_THEME.textMuted;
         ctx.font = "9px Segoe UI, Noto Sans JP, sans-serif";
         ctx.textAlign = "center";
-        //ctx.fillText("テレメトリ受信待ち", leftPad + plotW / 2, topPad + plotH / 2 + 3);
+        //ctx.fillText("Waiting for telemetry", leftPad + plotW / 2, topPad + plotH / 2 + 3);
         ctx.restore();
       }
 
@@ -4353,7 +4353,7 @@
         ctx.fillStyle = CANVAS_THEME.textMuted;
         ctx.font = "9px Segoe UI, Noto Sans JP, sans-serif";
         ctx.textAlign = "center";
-        ctx.fillText("RSSIデータ待ち", leftPad + plotW / 2, topPad + plotH / 2 + 3);
+        ctx.fillText("Waiting for RSSI data", leftPad + plotW / 2, topPad + plotH / 2 + 3);
         ctx.restore();
       }
 
@@ -4441,19 +4441,19 @@
     function resetRxCommandCount(reasonText) {
       rxCommandCount = 0;
       updateRxCommandCountDisplay();
-      if (rxCommandNoteEl) rxCommandNoteEl.textContent = reasonText || "AOSごとにリセット";
+      if (rxCommandNoteEl) rxCommandNoteEl.textContent = reasonText || "Reset at each AOS";
     }
 
     function incrementRxCommandCount() {
       rxCommandCount += 1;
       updateRxCommandCountDisplay();
-      if (rxCommandNoteEl) rxCommandNoteEl.textContent = `最終受信 ${formatTime(new Date())}`;
+      if (rxCommandNoteEl) rxCommandNoteEl.textContent = `Last received ${formatTime(new Date())}`;
     }
 
     function updateRssiFromReceivedText(text) {
       if (USE_SIMULATED_RSSI) return;
-      // 透明モードではXBeeのRSSIは自動では流れないため、
-      // 機体側や試験用ログに RSSI=-64 / RSSI:-64 / DB=40 のような文字列が含まれる場合のみ反映する。
+      // In transparent mode, XBee RSSI is not streamed automatically,
+      // so RSSI is applied only when the vehicle or test log contains a string such as RSSI=-64 / RSSI:-64 / DB=40.
       const directMatch = text.match(/RSSI\s*[:=]\s*(-?\d{1,3}(?:\.\d+)?)\s*(?:dBm)?/i);
       if (directMatch) {
         updateRssiDisplay(normalizeRssiDbm(directMatch[1]));
@@ -4888,8 +4888,8 @@
     }
 
     function showPictureCapturePending() {
-      setImageStatus("カメラ撮影中: IMG_BEGIN待ち");
-      if (imageReceiveProgressText) imageReceiveProgressText.textContent = "撮影・送信準備中";
+      setImageStatus("Capturing: waiting for IMG_BEGIN");
+      if (imageReceiveProgressText) imageReceiveProgressText.textContent = "Preparing capture and transfer";
       if (imageReceiveProgressBar) {
         imageReceiveProgressBar.hidden = false;
         imageReceiveProgressBar.removeAttribute("value");
@@ -4901,12 +4901,12 @@
 
       const commandText = commandInput.value.trim();
       if (!commandText) {
-        alert("送信するコマンドを入力してください。");
+        alert("Enter a command to send.");
         return;
       }
 
       if (!isAllowedCommand(commandText)) {
-        alert("送信できるコマンドは a、b、p です。");
+        alert("Allowed commands are a, b, or p.");
         return;
       }
 
@@ -4939,7 +4939,7 @@
           commandInput.focus();
         } catch (error) {
           console.error(error);
-          alert("receive_data.py を起動してから送信してください。");
+          alert("Start receive_data.py before sending.");
         }
         return;
       }
@@ -4949,7 +4949,7 @@
       }
 
       if (!xbeePort || !xbeeWriter) {
-        alert("XBeeポートに接続してから送信してください。");
+        alert("Connect to the XBee port before sending.");
         return;
       }
 
@@ -4974,7 +4974,7 @@
         commandInput.focus();
       } catch (error) {
         console.error(error);
-        alert("コマンド送信に失敗しました。");
+        alert("Failed to send the command.");
       }
     }
 
@@ -4998,13 +4998,13 @@
       if (selectPortButton) selectPortButton.disabled = true;
       if (connectPortButton) connectPortButton.disabled = false;
       selectedPortName.textContent = "Python Backend";
-      updatePortStatus("disconnected", "接続待ち");
+      updatePortStatus("disconnected", "Waiting to connect");
       updateFooterPort("Python Backend");
     }
 
     async function connectBackendReceiver() {
       try {
-        updatePortStatus("selected", "接続確認中");
+        updatePortStatus("selected", "Checking connection");
         await fetch(RECEIVER_START_API_URL, { method: "POST", cache: "no-store" });
         await new Promise(resolve => setTimeout(resolve, 900));
         const response = await fetch(COMMAND_API_HEALTH_URL, { cache: "no-store" });
@@ -5014,12 +5014,12 @@
         if (!body.serial_open) {
           backendReceiverConnected = false;
           updateTelemetryReceiveGate();
-          updatePortStatus("disconnected", "Python未接続");
-          alert("receive_data.py は起動していますが、シリアルポートが開いていません。COMポートの使用状況を確認してください。");
+          updatePortStatus("disconnected", "Python not connected");
+          alert("receive_data.py is running, but the serial port is not open. Check whether the COM port is in use.");
           return false;
         }
 
-        updatePortStatus("connected", "Python接続中");
+        updatePortStatus("connected", "Python connected");
         backendReceiverConnected = true;
         updateFooterPort(`Python Backend / ${XBEE_BAUD_RATE} bps`);
         updateTelemetryReceiveGate();
@@ -5028,8 +5028,8 @@
         console.error(error);
         backendReceiverConnected = false;
         updateTelemetryReceiveGate();
-        updatePortStatus("disconnected", "Python未起動");
-        alert("Pythonバックエンドに接続できません。npm start から起動し直してください。");
+        updatePortStatus("disconnected", "Python not running");
+        alert("Cannot connect to the Python backend. Restart with npm start.");
         return false;
       }
     }
@@ -5087,7 +5087,7 @@
 
       if (inPass && activePassResetKey !== passKey) {
         activePassResetKey = passKey;
-        resetRxCommandCount("新しいパスでリセット");
+        resetRxCommandCount("Reset for new pass");
       }
 
       if (!inPass && activePassResetKey === passKey && now > los) {
@@ -5133,19 +5133,19 @@
     function updatePortStatus(status, text) {
       if (status === "connected") {
         setPortDot("connected");
-        portStatusText.textContent = text || "接続中";
+        portStatusText.textContent = text || "Connected";
         portStatusText.className = "green";
         if (connectPortButton) connectPortButton.disabled = true;
         if (disconnectPortButton) disconnectPortButton.disabled = false;
       } else if (status === "selected") {
         setPortDot("selected");
-        portStatusText.textContent = text || "選択済み";
+        portStatusText.textContent = text || "Selected";
         portStatusText.className = "orange";
         if (connectPortButton) connectPortButton.disabled = false;
         if (disconnectPortButton) disconnectPortButton.disabled = true;
       } else {
         setPortDot("disconnected");
-        portStatusText.textContent = text || "未接続";
+        portStatusText.textContent = text || "Disconnected";
         portStatusText.className = "";
         if (connectPortButton) connectPortButton.disabled = false;
         if (disconnectPortButton) disconnectPortButton.disabled = true;
@@ -5183,7 +5183,7 @@
     async function requestXbeePortFromBrowser() {
       if (serialPortSelectionInProgress) return null;
       serialPortSelectionInProgress = true;
-      updatePortStatus("selected", "ポート選択中...");
+      updatePortStatus("selected", "Selecting port...");
       if (selectPortButton) selectPortButton.disabled = true;
       if (connectPortButton) connectPortButton.disabled = true;
 
@@ -5205,27 +5205,27 @@
       }
 
       if (errorName === "InvalidStateError") {
-        return "このポートはすでに開かれています。ページを再読み込みしてから再接続してください。";
+        return "This port is already open. Reload the page and reconnect.";
       }
 
       if (errorName === "NetworkError") {
         return [
-          "XBeeポートを開けませんでした。",
-          "receive_data.py、Arduino IDE、TeraTerm、PuTTYなど、同じCOMポートを使っているアプリを閉じてから再接続してください。",
-          errorMessage ? `詳細: ${errorMessage}` : ""
+          "Could not open the XBee port.",
+          "Close any app using the same COM port, such as receive_data.py, Arduino IDE, Tera Term, or PuTTY, then reconnect.",
+          errorMessage ? `Details: ${errorMessage}` : ""
         ].filter(Boolean).join("\n");
       }
 
       return [
-        "XBeeポートへの接続に失敗しました。",
-        errorMessage ? `詳細: ${errorName}: ${errorMessage}` : `詳細: ${errorName}`
+        "Failed to connect to the XBee port.",
+        errorMessage ? `Details: ${errorName}: ${errorMessage}` : `Details: ${errorName}`
       ].join("\n");
     }
 
     selectPortButton.addEventListener("click", async () => {
       try {
         if (!("serial" in navigator)) {
-          alert("このブラウザはWeb Serial APIに対応していません。ChromeまたはEdgeを使用してください。");
+          alert("This browser does not support the Web Serial API. Use Chrome or Edge.");
           return;
         }
 
@@ -5235,21 +5235,21 @@
         const portName = getPortDisplayName(xbeePort);
 
         selectedPortName.textContent = portName;
-        updatePortStatus("selected", "選択済み");
+        updatePortStatus("selected", "Selected");
         updateFooterPort(portName);
 
       } catch (error) {
         console.error(error);
-        updatePortStatus("disconnected", "ポート選択キャンセル");
-        selectedPortName.textContent = "未選択";
-        updateFooterPort("未選択");
+        updatePortStatus("disconnected", "Port selection cancelled");
+        selectedPortName.textContent = "Not selected";
+        updateFooterPort("Not selected");
       }
     });
 
     async function openSelectedXbeePort() {
       try {
         if (!("serial" in navigator)) {
-          alert("このブラウザはWeb Serial APIに対応していません。ChromeまたはEdgeを使用してください。");
+          alert("This browser does not support the Web Serial API. Use Chrome or Edge.");
           return false;
         }
 
@@ -5258,12 +5258,12 @@
           if (!xbeePort) return false;
           const selectedName = getPortDisplayName(xbeePort);
           selectedPortName.textContent = selectedName;
-          updatePortStatus("selected", "選択済み");
+          updatePortStatus("selected", "Selected");
           updateFooterPort(selectedName);
         }
 
         if (xbeeWriter && isXbeePortOpen()) {
-          updatePortStatus("connected", "接続中");
+          updatePortStatus("connected", "Connected");
           startSimulatedRssi();
           startXbeeReadLoop();
           return true;
@@ -5275,7 +5275,7 @@
 
         const portName = getPortDisplayName(xbeePort);
 
-        updatePortStatus("connected", "接続中");
+        updatePortStatus("connected", "Connected");
         selectedPortName.textContent = portName;
         updateFooterPort(`${portName} / ${XBEE_BAUD_RATE} bps`);
         startSimulatedRssi();
@@ -5285,11 +5285,11 @@
       } catch (error) {
         console.error(error);
         if (error && error.name === "NotFoundError") {
-          updatePortStatus("disconnected", "ポート選択キャンセル");
-          selectedPortName.textContent = "未選択";
-          updateFooterPort("未選択");
+          updatePortStatus("disconnected", "Port selection cancelled");
+          selectedPortName.textContent = "Not selected";
+          updateFooterPort("Not selected");
         } else {
-          updatePortStatus("disconnected", "接続失敗");
+          updatePortStatus("disconnected", "Connection failed");
           const message = getSerialOpenFailureMessage(error);
           if (message) alert(message);
         }
@@ -5335,18 +5335,18 @@
 
       updateTelemetryReceiveGate();
       if (xbeePort) {
-        updatePortStatus("selected", "切断済み");
+        updatePortStatus("selected", "Disconnected");
         updateFooterPort(getPortDisplayName(xbeePort));
       } else {
-        updatePortStatus("disconnected", "未接続");
-        updateFooterPort("未接続");
+        updatePortStatus("disconnected", "Disconnected");
+        updateFooterPort("Disconnected");
       }
     }
 
     function disconnectBackendReceiver() {
       backendReceiverConnected = false;
       updateTelemetryReceiveGate();
-      updatePortStatus("disconnected", "接続待ち");
+      updatePortStatus("disconnected", "Waiting to connect");
       updateFooterPort("Python Backend");
     }
 
@@ -5378,7 +5378,7 @@
         xbeePort = ports[0];
         const portName = getPortDisplayName(xbeePort);
         selectedPortName.textContent = portName;
-        updatePortStatus("selected", "選択済み");
+        updatePortStatus("selected", "Selected");
         updateFooterPort(portName);
         await openSelectedXbeePort();
       } catch (error) {
@@ -5436,8 +5436,8 @@
     const PASS_LIST_MAX_ROWS = 24;
     const PASS_START_BEFORE_AOS_MS = 10 * 1000;
 
-    // Az/Elグラフは、パスの見え始め・見え終わりを少し広く見るため、
-    // 仰角5degを描画開始・終了の基準にする。
+    // Az/El graphs use a slightly wider window around pass start and end,
+    // using elevation 5 deg as the drawing start and end.
     const AZEL_GRAPH_EDGE_ELEVATION_DEG = TRACKING_DISPLAY_MIN_ELEVATION_DEG;
 
     let azelGraphWindowCache = {
@@ -5538,7 +5538,7 @@
       const { body, empty } = getPassListElements(source);
       if (body) body.innerHTML = "";
       if (empty) {
-        empty.textContent = "パス計算中...";
+        empty.textContent = "Calculating passes...";
         empty.style.display = "block";
       }
     }
@@ -5582,7 +5582,7 @@
       };
 
       setPassTimes(pass.aosDate, pass.losDate);
-      renderPassList(currentPassList, "条件に合うパスがありません");
+      renderPassList(currentPassList, "No matching passes");
       resetTrackingForTleChange();
       const passStartDate = new Date(pass.aosDate.getTime() - PASS_START_BEFORE_AOS_MS);
       orbitMapState.displayDate = passStartDate;
@@ -5602,12 +5602,12 @@
       selectedPassIndex = -1;
       currentTle = { name: satelliteName, line1: "", line2: "" };
       resetTrackingForTleChange();
-      orbitMapState.message = "パスを選択してください";
+      orbitMapState.message = "Select a pass";
       drawOrbitMap();
 
       setPassTimesCalculating();
       setPassListCalculating(listSource);
-      setPassStatus("SGP4でパス一覧を計算中...", "cyan");
+      setPassStatus("Calculating pass list with SGP4...", "cyan");
       console.log(`${satelliteName} TLE:`, pendingCustomTle);
 
       try {
@@ -5616,13 +5616,13 @@
         const gs = getGroundStationSetting();
         const passes = findPassesBySgp4(line1, line2, gs);
 
-        renderPassList(passes, "条件に合うパスがありません", listSource);
+        renderPassList(passes, "No matching passes", listSource);
         if (passes.length > 0) {
           await selectCustomPassForOrbit(0);
         } else {
           setPassTimes(null, null);
           setPassStatus(
-            `条件に合うパスがありません：El ${AOS_LOS_ELEVATION_THRESHOLD_DEG}°以上 / ${gs.name} (${gs.lat.toFixed(4)}, ${gs.lon.toFixed(4)})`,
+            `No matching passes: El ${AOS_LOS_ELEVATION_THRESHOLD_DEG}° or higher / ${gs.name} (${gs.lat.toFixed(4)}, ${gs.lon.toFixed(4)})`,
             "red"
           );
         }
@@ -5630,17 +5630,17 @@
         console.error(error);
         pendingCustomTle = null;
         setPassTimes(null, null);
-        renderPassList([], "パスを計算できませんでした", listSource);
+        renderPassList([], "Could not calculate passes", listSource);
         orbitMapState.satrec = null;
         orbitMapState.track = [];
         orbitMapState.periodMin = null;
         orbitMapState.displayDate = null;
         orbitMapState.displayRealStartMs = null;
         updateCurrentClock();
-        orbitMapState.message = "TLE/SGP4エラー";
+        orbitMapState.message = "TLE/SGP4 error";
         resetAzelGraphWindowCache();
         clearTrackingLabels();
-        setPassStatus(`エラー：${error.message}`, "red");
+        setPassStatus(`Error: ${error.message}`, "red");
       }
     }
 
@@ -5651,8 +5651,8 @@
     }
 
     function setPassTimesCalculating() {
-      if (aosTimeEl) aosTimeEl.textContent = "計算中";
-      if (losTimeEl) losTimeEl.textContent = "計算中";
+      if (aosTimeEl) aosTimeEl.textContent = "Calculating";
+      if (losTimeEl) losTimeEl.textContent = "Calculating";
     }
 
     function chooseTleTrailingToken(token, minDigits, buildBase) {
@@ -5742,7 +5742,7 @@
 
           if (Date.now() - start > timeoutMs) {
             clearInterval(timer);
-            reject(new Error("satellite.js を読み込めませんでした。インターネット接続を確認してください。"));
+            reject(new Error("Could not load satellite.js. Check your internet connection."));
           }
         }, 100);
       });
@@ -5968,11 +5968,11 @@
       const aosDate = new Date(baseDate.getTime() + secondsToAos * 1000);
 
       /*
-        SAT1開発試験用TLE：
-        - 表示上のAOSはEl 5degで、約3分後に来るようにする
-        - その後、地上局のほぼ真上を通るようにして最大El 70deg以上を満たしやすくする
-        - 高度540km / 軌道傾斜角98deg / 円軌道近似
-        - TLE epochは現在時刻 baseDate
+        SAT1 development test TLE:
+        - Make displayed AOS occur at El 5 deg, about 3 minutes from now
+        - Then pass nearly overhead of the ground station so max El of 70 deg or more is easy to meet
+        - Altitude 540 km / inclination 98 deg / near-circular orbit
+        - TLE epoch is the current time baseDate
       */
       const targetCentralAngle = centralAngleForElevation(
         earthRadiusKm,
@@ -6132,13 +6132,13 @@ ${tle.line2}`;
     function findNextPassBySgp4(line1, line2, gs) {
       const satelliteLib = window.satellite;
       if (!satelliteLib) {
-        throw new Error("satellite.js が読み込めていません。インターネット接続がある状態で開き直してください。");
+        throw new Error("satellite.js is not loaded. Reopen the page with an internet connection.");
       }
 
       const satrec = satelliteLib.twoline2satrec(line1, line2);
 
       if (satrec.error && satrec.error !== 0) {
-        throw new Error("SGP4でTLEを読み込めませんでした。TLEの内容を確認してください。");
+        throw new Error("SGP4 could not parse the TLE. Check the TLE contents.");
       }
 
       const now = new Date();
@@ -6206,7 +6206,7 @@ ${tle.line2}`;
         prevEl = el;
       }
 
-      throw new Error(`36時間以内にEl ${thresholdDeg}°で始まり、最大El ${PASS_MIN_MAX_ELEVATION_DEG}°以上となるパスを見つけられませんでした。`);
+      throw new Error(`Could not find a pass within 36 hours that starts at El ${thresholdDeg}° and reaches max El ${PASS_MIN_MAX_ELEVATION_DEG}° or higher.`);
     }
 
 
@@ -6745,7 +6745,7 @@ ${tle.line2}`;
         satLabel.scale.set(1.95, 0.76, 1);
         scene.add(satLabel);
 
-        const statusLabel = makeAntenna3DLabel("TLE待ち", "#8ea3af");
+        const statusLabel = makeAntenna3DLabel("Waiting for TLE", "#8ea3af");
         statusLabel.position.set(0, 3.0, 0);
         scene.add(statusLabel);
 
@@ -7060,7 +7060,7 @@ ${tle.line2}`;
       if (antennaAzLabel) antennaAzLabel.textContent = `${look.azDeg.toFixed(1)}°`;
       if (antennaElLabel) antennaElLabel.textContent = `${look.elDeg.toFixed(1)}°`;
       if (antennaRangeLabel) antennaRangeLabel.textContent = `${look.rangeKm.toFixed(0)} km`;
-      if (antennaStatusLabel) antennaStatusLabel.textContent = passVisible ? "可視範囲内" : "可視範囲外";
+      if (antennaStatusLabel) antennaStatusLabel.textContent = passVisible ? "In view" : "Out of view";
 
       state.renderer.render(state.scene, state.camera);
     }
@@ -7516,7 +7516,7 @@ ${tle.line2}`;
       if (antennaAzLabel) antennaAzLabel.textContent = "--";
       if (antennaElLabel) antennaElLabel.textContent = "--";
       if (antennaRangeLabel) antennaRangeLabel.textContent = "--";
-      if (antennaStatusLabel) antennaStatusLabel.textContent = "更新中";
+      if (antennaStatusLabel) antennaStatusLabel.textContent = "Updating";
       if (graphAzLabel) graphAzLabel.textContent = "--";
       if (graphElLabel) graphElLabel.textContent = "--";
     }
@@ -7524,7 +7524,7 @@ ${tle.line2}`;
     function resetTrackingForTleChange() {
       resetAzelGraphWindowCache();
 
-      // 新しいTLEのSGP4計算が終わるまで、古い衛星位置・グラフを表示し続けない。
+      // Do not keep showing the old satellite position or graphs until SGP4 finishes for the new TLE.
       orbitMapState.satrec = null;
       orbitMapState.track = [];
       orbitMapState.periodMin = null;
@@ -7564,7 +7564,7 @@ ${tle.line2}`;
       lastTrackUpdate: 0,
       displayDate: null,
       displayRealStartMs: null,
-      message: "TLE読込待ち"
+      message: "Waiting for TLE"
     };
 
     // Natural Earth public domain vector data; usable commercially without attribution.
@@ -7595,8 +7595,8 @@ ${tle.line2}`;
     function updateOrbitMapModeButton() {
       if (!orbitMapModeButton) return;
       orbitMapModeButton.textContent = orbitMapViewMode === "world"
-        ? "衛星付近を拡大"
-        : "世界全体を表示";
+        ? "Zoom to Satellite"
+        : "Show World";
     }
 
     if (orbitMapModeButton) {
@@ -7708,7 +7708,7 @@ ${tle.line2}`;
         orbitMapState.displayDate = null;
         orbitMapState.displayRealStartMs = null;
         updateCurrentClock();
-        orbitMapState.message = "TLE/SGP4エラー";
+        orbitMapState.message = "TLE/SGP4 error";
         resetAzelGraphWindowCache();
         clearTrackingLabels();
         drawTrackingDisplays();
@@ -8153,7 +8153,7 @@ ${tle.line2}`;
       setOrbitMapView(width, mapHeight, satForView);
       drawWorldMap(ctx, width, mapHeight);
 
-      // 下部の情報チップと軌道表示が被らないように、地図描画だけ少し上で止める
+      // Stop map drawing slightly above the bottom so the info chips do not overlap the orbit
       ctx.save();
       ctx.fillStyle = "rgba(234, 243, 255, 0.94)";
       ctx.fillRect(0, mapHeight, width, height - mapHeight);
@@ -8201,7 +8201,7 @@ ${tle.line2}`;
         drawPoint(ctx, satPos.x, satPos.y, 5.5, "#f2a400", "#fff3c7", currentTle.name || "SAT");
 
         if (orbitMapSatLabel) {
-          const modeLabel = orbitMapViewMode === "follow" ? "追尾" : "全体";
+          const modeLabel = orbitMapViewMode === "follow" ? "Track" : "World";
           orbitMapSatLabel.textContent = `${sat.lat.toFixed(2)}, ${sat.lon.toFixed(2)} / ${modeLabel}`;
         }
       }
@@ -8248,7 +8248,7 @@ ${tle.line2}`;
         setPassTimes(null, null);
         renderPassList([], "", "custom");
         resetTrackingForTleChange();
-        orbitMapState.message = "軌道計算してください";
+        orbitMapState.message = "Calculate an orbit";
         drawOrbitMap();
 
         tleStatus.textContent = "";
@@ -8298,7 +8298,7 @@ ${tle.line2}`;
         if (!line1 || !line2) {
           setPassTimes(null, null);
           renderPassList([], "", "sat1");
-          setPassStatus("SAT1 TLEを生成できませんでした。", "red");
+          setPassStatus("Could not generate the SAT1 TLE.", "red");
           return;
         }
 
@@ -8313,8 +8313,8 @@ ${tle.line2}`;
       if (!line1 || !line2) {
         setPassTimes(null, null);
         renderPassList([], "");
-        setPassStatus("TLEの1行目・2行目を入力してください。", "red");
-        alert("TLEの形式を確認してください。1行目は「1 」、2行目は「2 」から始まる必要があります。");
+        setPassStatus("Enter TLE line 1 and line 2.", "red");
+        alert("Check the TLE format. Line 1 must start with \"1 \" and line 2 with \"2 \".");
         return;
       }
 
@@ -8325,8 +8325,8 @@ ${tle.line2}`;
        Initial State
     ========================= */
 
-    updatePortStatus("disconnected", "未接続");
-    updateFooterPort("未接続");
+    updatePortStatus("disconnected", "Disconnected");
+    updateFooterPort("Disconnected");
 
     resizeOrbitMapCanvas();
     drawOrbitMap();

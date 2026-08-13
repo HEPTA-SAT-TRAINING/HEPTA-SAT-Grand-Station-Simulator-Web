@@ -14,28 +14,17 @@ https://hepta-sat-training.github.io/HEPTA-SAT-Grand-Station-Simulator-Web/
 - HEPTA-SAT V4.1.1 EPS and nine-axis history graphs
 - JPEG reception with packet/image CRC validation and one-packet parity recovery
 - Web Serial communication with supported serial devices
-- Modular feature selector for future extensions
 
 ## Project Structure
 
-- `index.html`: Application entry point and feature view container
-- `features.js`: Feature definitions
-- `app.js`: Feature selection logic
-- `styles.css`: Application shell and feature selector styles
+- `index.html`: Application entry point
+- `styles.css`: Application shell styles
 - `public/ground-station.html`: Ground station interface
 - `public/hepta-image-receiver.js`: telemetry/image stream adapter
 - `public/vendor/hepta-serial-monitor`: pinned HEPTA-SAT Serial Monitor submodule
 - `tests/verify-protocol.mjs`: fragmented serial/image protocol mock test
 - `public/`: Maps, orbit libraries, and Three.js assets
 - `.github/workflows/pages.yml`: GitHub Pages deployment workflow
-
-The ground station iframe remains mounted when switching features so that the serial connection and application state are preserved.
-
-## Adding a New Feature
-
-1. Add the feature definition to `features.js`.
-2. Add a matching `data-feature-view` section to `index.html`.
-3. Add any required JavaScript and CSS as separate files.
 
 ## Local Development
 
@@ -69,10 +58,10 @@ python3 -m http.server 8080
 
 Open `http://localhost:8080/` in Chrome or Edge. Web Serial requires a secure context, such as HTTPS or localhost, and a compatible browser.
 
-## HEPTA XBee, telemetry, and Lab compatibility
+## HEPTA-SAT XBee, telemetry, and Lab compatibility
 
 Web Serial opens the XBee adapter at **38400 baud**, matching the existing
-HEPTA training XBee pair. The current Flight Software sends the same
+HEPTA-SAT training XBee pair. The current Flight Software sends the same
 CRLF-terminated text records as the Lab repositories. The receiver buffers
 arbitrary Web Serial chunks until LF, matching HEPTA-SAT Serial Monitor.
 Received hardware telemetry is displayed during bench tests regardless of the
@@ -135,12 +124,12 @@ Pages workflow also initializes submodules before publishing.
 
 ## Dashboard display controls
 
-The **表示機能** control in the dashboard header opens a checklist for the
+The **Display Features** control in the dashboard header opens a checklist for the
 orbit, tracking, telemetry, image, packet-log, and command panels. Hiding a
 panel only changes the layout; it does not stop serial reception or telemetry
 history collection. The selected panel set is saved in browser local storage.
 
-The **表示グラフ** control beside **テレメトリ推移** independently enables
+The **Display Graphs** control beside **Telemetry History** independently enables
 temperature, voltage, EPS voltage, current, acceleration, angular-rate, and
 magnetic-field graphs. At least one graph remains selected, and the selection
 is also restored after a reload. This keeps the default dashboard readable

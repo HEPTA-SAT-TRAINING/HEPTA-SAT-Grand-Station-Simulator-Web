@@ -1,66 +1,24 @@
 <!doctype html>
-<html lang="ja">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>HEPTA-SAT Grand Station Web</title>
     <meta
       name="description"
-      content="HEPTA-SAT向けのリアルタイム地上局Webコンソール"
+      content="Real-time ground station web console for HEPTA-SAT"
     />
     <link rel="icon" href="./public/favicon.svg" />
     <link rel="stylesheet" href="./styles.css" />
-    <script type="module" src="./app.js"></script>
   </head>
   <body>
     <main class="feature-workspace">
-      <div class="feature-selector">
-        <button
-          type="button"
-          class="feature-selector__trigger"
-          id="feature-selector-trigger"
-          aria-expanded="false"
-          aria-controls="feature-selector-menu"
-        >
-          <span class="feature-selector__trigger-icon" aria-hidden="true">☰</span>
-          機能選択
-        </button>
-
-        <div
-          class="feature-selector__menu"
-          id="feature-selector-menu"
-          role="menu"
-          aria-label="機能一覧"
-          hidden
-        >
-          <div class="feature-selector__heading">機能一覧</div>
-          <div id="feature-selector-items"></div>
-          <div class="feature-selector__current" id="feature-selector-current"></div>
-        </div>
-      </div>
-
-      <section
-        class="feature-view feature-view--ground-station"
-        data-feature-view="ground-station"
-      >
-        <iframe
-          class="legacy-ui-frame"
-          src="./public/ground-station.html"
-          title="HEPTA Ground Station Simulator"
-          allow="serial"
-        ></iframe>
-      </section>
-
-      <section
-        class="feature-view feature-placeholder"
-        data-feature-view="new-function"
-        hidden
-        aria-hidden="true"
-      >
-        <div class="feature-placeholder__panel">
-          <p>この機能はまだ実装されていません</p>
-        </div>
-      </section>
+      <iframe
+        class="legacy-ui-frame"
+        src="./public/ground-station.html"
+        title="HEPTA-SAT Ground Station Simulator"
+        allow="serial"
+      ></iframe>
     </main>
   </body>
 </html>
