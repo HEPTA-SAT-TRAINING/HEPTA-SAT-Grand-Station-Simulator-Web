@@ -198,6 +198,8 @@ assert.match(html, /\.app\s*\{[\s\S]*width: 100%/);
 assert.match(html, /\.top-area > \*,[\s\S]*\.bottom-area > \*\s*\{[\s\S]*min-width: 0/);
 assert.match(html, /function normalizeBottomWidths/);
 assert.match(html, /command-log-command[\s\S]*min-width: 0/);
+assert.match(html, /grid-template-rows: repeat\(2, minmax\(280px, 1fr\)\)/);
+assert.match(html, /\.mini-graph-canvas-wrap[\s\S]*min-height: 250px/);
 
 // The command UI must accept the three single-byte Lab commands, including p.
 const commandIdsSource = html.match(/commandIds:\s*{([\s\S]*?)}/)?.[1] || "";

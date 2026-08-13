@@ -858,8 +858,8 @@
 
     .azel-split-body {
       display: grid;
-      grid-template-rows: repeat(2, 220px);
-      grid-auto-rows: 220px;
+      grid-template-rows: repeat(2, minmax(280px, 1fr));
+      grid-auto-rows: 280px;
       gap: 5px;
       padding: 3px 2px;
       overflow-y: auto;
@@ -870,7 +870,7 @@
 
     .mini-graph-box {
       position: relative;
-      min-height: 0;
+      min-height: 280px;
       border: 1px solid rgba(45, 70, 84, 0.8);
       border-radius: 4px;
       overflow: hidden;
@@ -891,7 +891,7 @@
 
     .mini-graph-canvas-wrap {
       position: relative;
-      min-height: 0;
+      min-height: 250px;
       overflow: hidden;
     }
 
@@ -2261,8 +2261,8 @@
     }
 
     .azel-split-body {
-      grid-template-rows: repeat(2, 220px);
-      grid-auto-rows: 220px;
+      grid-template-rows: repeat(2, minmax(280px, 1fr));
+      grid-auto-rows: 280px;
       align-content: start;
       overflow-y: auto;
       overflow-x: hidden;
@@ -2270,7 +2270,7 @@
     }
 
     .mini-graph-box {
-      min-height: 0;
+      min-height: 280px;
     }
 
     .mini-graph-canvas-wrap {
