@@ -38,7 +38,7 @@ function selectFeature(featureId) {
     item.dataset.selected = String(item.dataset.featureId === selectedFeatureId);
   }
 
-  currentLabel.textContent = `表示中: ${feature.label}`;
+  currentLabel.textContent = `Viewing: ${feature.label}`;
   setMenuOpen(false);
 }
 

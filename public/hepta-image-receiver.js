@@ -48,12 +48,12 @@ function trailingPrefixLength(bytes, marker) {
 
 function validateJpeg(image) {
   if (image.length < 4 || image[0] !== 0xff || image[1] !== 0xd8) {
-    throw new Error("JPEGのSOI markerが不正です");
+    throw new Error("Invalid JPEG SOI marker");
   }
   for (let i = 3; i < image.length; i += 1) {
     if (image[i - 1] === 0xff && image[i] === 0xd9) return;
   }
-  throw new Error("JPEGのEOI markerが不正です");
+  throw new Error("Invalid JPEG EOI marker");
 }
 
 /**
@@ -126,7 +126,7 @@ export class StreamReceiver {
 
         this.assembler.accept(packet);
         if (this.assembler.meta?.imageSize > IMAGE_SIZE_MAX) {
-          throw new Error(`画像サイズが上限を超えています: ${this.assembler.meta.imageSize} bytes`);
+          throw new Error(`Image size exceeds the limit: ${this.assembler.meta.imageSize} bytes`);
         }
         this.callbacks.onProgress?.(this.assembler.getReceptionSummary());
 
@@ -173,7 +173,7 @@ export class StreamReceiver {
   resetPacketTimeout() {
     clearTimeout(this.packetTimer);
     this.packetTimer = setTimeout(
-      () => this.failImage("画像packet timeout (10秒)"),
+      () => this.failImage("Image packet timeout (10 s)"),
       PACKET_TIMEOUT_MS,
     );
   }
@@ -181,7 +181,7 @@ export class StreamReceiver {
   startImageTimeout() {
     clearTimeout(this.imageTimer);
     this.imageTimer = setTimeout(
-      () => this.failImage("画像受信timeout (60秒)"),
+      () => this.failImage("Image reception timeout (60 s)"),
       IMAGE_TIMEOUT_MS,
     );
   }

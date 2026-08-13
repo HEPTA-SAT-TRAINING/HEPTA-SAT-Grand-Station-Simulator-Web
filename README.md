@@ -135,12 +135,12 @@ Pages workflow also initializes submodules before publishing.
 
 ## Dashboard display controls
 
-The **表示機能** control in the dashboard header opens a checklist for the
+The **Display Features** control in the dashboard header opens a checklist for the
 orbit, tracking, telemetry, image, packet-log, and command panels. Hiding a
 panel only changes the layout; it does not stop serial reception or telemetry
 history collection. The selected panel set is saved in browser local storage.
 
-The **表示グラフ** control beside **テレメトリ推移** independently enables
+The **Display Graphs** control beside **Telemetry History** independently enables
 temperature, voltage, EPS voltage, current, acceleration, angular-rate, and
 magnetic-field graphs. At least one graph remains selected, and the selection
 is also restored after a reload. This keeps the default dashboard readable
